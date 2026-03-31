@@ -1,0 +1,24 @@
+{
+  "name": "jschardet-ultra",
+  "version": "2.0.0",
+  "description": "Universal character encoding detection for JavaScript - supports 100+ encodings including CJK, Unicode, Windows code pages, ISO-8859, IBM/DOS, Macintosh, KOI8 and more",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage",
+    "test:round": "node test/run-round-test.js"
+  },
+  "keywords": ["encoding", "charset", "detection", "unicode", "cjk", "gbk", "big5", "shift_jis", "euc-jp", "euc-kr", "iso-8859", "windows-1252"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "iconv-lite": "^0.6.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testMatch": ["**/test/**/*.test.js"],
+    "testTimeout": 30000
+  }
+}
