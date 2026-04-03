@@ -1,6 +1,6 @@
 {
   "name": "jschardet-ultra",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Universal character encoding detection for JavaScript - supports 100+ encodings including CJK, Unicode, Windows code pages, ISO-8859, IBM/DOS, Macintosh, KOI8 and more",
   "main": "src/index.js",
   "scripts": {

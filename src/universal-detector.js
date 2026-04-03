@@ -12,39 +12,37 @@ const SB_PROFILES = [
   {
     encoding: 'windows-1251',
     lang: 'cyrillic',
-    // High bytes that are valid in this encoding
     validRange: [0x80, 0xFF],
-    // Most frequent bytes for Russian text in this encoding
-    signature: [0xE0, 0xEE, 0xE8, 0xE5, 0xED, 0xF2, 0xF1, 0xE2, 0xE0, 0xEB, 0xEA, 0xEF],
-    // Bytes that should NOT appear for this encoding
+    // Most frequent bytes for Russian text in windows-1251
+    signature: [0xE0, 0xEE, 0xE8, 0xE5, 0xED, 0xF2, 0xF1, 0xE2, 0xEB, 0xEA, 0xEF, 0xF0, 0xE4, 0xE7, 0xE3, 0xEC],
     invalidBytes: [],
   },
   {
     encoding: 'koi8-r',
     lang: 'cyrillic',
     validRange: [0xC0, 0xFF],
-    signature: [0xC1, 0xCF, 0xC9, 0xC5, 0xCE, 0xD4, 0xD3, 0xC2, 0xC1, 0xCC, 0xCB, 0xD0],
+    signature: [0xC1, 0xCF, 0xC9, 0xC5, 0xCE, 0xD4, 0xD3, 0xC2, 0xCC, 0xCB, 0xD0, 0xC4, 0xC7, 0xC3, 0xCD],
     invalidBytes: [],
   },
   {
     encoding: 'koi8-u',
     lang: 'cyrillic',
     validRange: [0xC0, 0xFF],
-    signature: [0xC1, 0xCF, 0xC9, 0xC5, 0xCE, 0xD4, 0xD3, 0xC2, 0xC1, 0xCC, 0xCB, 0xD0],
+    signature: [0xC1, 0xCF, 0xC9, 0xC5, 0xCE, 0xD4, 0xD3, 0xC2, 0xCC, 0xCB, 0xD0],
     invalidBytes: [],
   },
   {
     encoding: 'iso-8859-5',
     lang: 'cyrillic',
     validRange: [0xA0, 0xFF],
-    signature: [0xD0, 0xDE, 0xD8, 0xD5, 0xDD, 0xE2, 0xE1, 0xD2],
+    signature: [0xD0, 0xDE, 0xD8, 0xD5, 0xDD, 0xE2, 0xE1, 0xD2, 0xDA, 0xD9, 0xDF, 0xD4],
     invalidBytes: [],
   },
   {
     encoding: 'cp866',
     lang: 'cyrillic',
     validRange: [0x80, 0xFF],
-    signature: [0xA0, 0xAE, 0xA8, 0xA5, 0xAD, 0xE2, 0xE1, 0xA2],
+    signature: [0xA0, 0xAE, 0xA8, 0xA5, 0xAD, 0xE2, 0xE1, 0xA2, 0xAA, 0xA9, 0xAF, 0xA4],
     invalidBytes: [],
   },
 
@@ -53,7 +51,7 @@ const SB_PROFILES = [
     encoding: 'windows-1252',
     lang: 'western',
     validRange: [0x80, 0xFF],
-    signature: [0xE9, 0xE8, 0xEA, 0xEB, 0xE0, 0xE2, 0xEE, 0xF4, 0xFC, 0xF6, 0xE4, 0xDF],
+    signature: [0xE9, 0xE8, 0xEA, 0xEB, 0xE0, 0xE2, 0xEE, 0xF4, 0xFC, 0xF6, 0xE4, 0xDF, 0xE1, 0xED, 0xF3, 0xFA],
     invalidBytes: [0x81, 0x8D, 0x8F, 0x90, 0x9D],
   },
   {
@@ -76,14 +74,14 @@ const SB_PROFILES = [
     encoding: 'windows-1250',
     lang: 'central_european',
     validRange: [0x80, 0xFF],
-    signature: [0xE1, 0xE9, 0xED, 0xF3, 0xFA, 0xE8, 0xF8, 0xF9, 0xF2, 0xBB, 0xAB],
+    signature: [0xE1, 0xE9, 0xED, 0xF3, 0xFA, 0xE8, 0xF8, 0xF9, 0xF2, 0xBB, 0xAB, 0xF6, 0xFC, 0xE0],
     invalidBytes: [0x81, 0x83, 0x88, 0x98],
   },
   {
     encoding: 'iso-8859-2',
     lang: 'central_european',
     validRange: [0xA0, 0xFF],
-    signature: [0xE1, 0xE9, 0xED, 0xF3, 0xFA, 0xE8, 0xF8, 0xF9],
+    signature: [0xE1, 0xE9, 0xED, 0xF3, 0xFA, 0xE8, 0xF8, 0xF9, 0xF6, 0xFC],
     invalidBytes: [],
   },
 
@@ -92,14 +90,14 @@ const SB_PROFILES = [
     encoding: 'windows-1253',
     lang: 'greek',
     validRange: [0x80, 0xFF],
-    signature: [0xE1, 0xE5, 0xE9, 0xEF, 0xF4, 0xED, 0xF3, 0xE7, 0xF0, 0xEA],
+    signature: [0xE1, 0xE5, 0xE9, 0xEF, 0xF4, 0xED, 0xF3, 0xE7, 0xF0, 0xEA, 0xEF, 0xF5, 0xEC],
     invalidBytes: [0x81, 0x88, 0x8A, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x98, 0x9A, 0x9C, 0x9D, 0x9E, 0x9F, 0xAA, 0xD2, 0xFF],
   },
   {
     encoding: 'iso-8859-7',
     lang: 'greek',
     validRange: [0xA0, 0xFF],
-    signature: [0xE1, 0xE5, 0xE9, 0xEF, 0xF4, 0xED, 0xF3, 0xE7],
+    signature: [0xE1, 0xE5, 0xE9, 0xEF, 0xF4, 0xED, 0xF3, 0xE7, 0xF5, 0xEC],
     invalidBytes: [0xAE, 0xD2, 0xFF],
   },
 
@@ -108,14 +106,14 @@ const SB_PROFILES = [
     encoding: 'windows-1254',
     lang: 'turkish',
     validRange: [0x80, 0xFF],
-    signature: [0xE2, 0xE7, 0xF6, 0xFC, 0xFD, 0xF0, 0xFE, 0xE8, 0xED, 0xF1],
+    signature: [0xE2, 0xE7, 0xF6, 0xFC, 0xFD, 0xF0, 0xFE, 0xE8, 0xED, 0xF1, 0xE1, 0xE9],
     invalidBytes: [0x81, 0x8D, 0x8E, 0x8F, 0x90, 0x9D, 0x9E],
   },
   {
     encoding: 'iso-8859-9',
     lang: 'turkish',
     validRange: [0xA0, 0xFF],
-    signature: [0xE2, 0xE7, 0xF6, 0xFC, 0xFD, 0xF0, 0xFE, 0xE8],
+    signature: [0xE2, 0xE7, 0xF6, 0xFC, 0xFD, 0xF0, 0xFE, 0xE8, 0xED, 0xF1],
     invalidBytes: [],
   },
 
@@ -124,14 +122,14 @@ const SB_PROFILES = [
     encoding: 'windows-1255',
     lang: 'hebrew',
     validRange: [0x80, 0xFF],
-    signature: [0xE0, 0xE5, 0xE9, 0xEC, 0xEE, 0xF0, 0xF8, 0xFA, 0xE1, 0xE3],
+    signature: [0xE0, 0xE5, 0xE9, 0xEC, 0xEE, 0xF0, 0xF8, 0xFA, 0xE1, 0xE3, 0xE4, 0xE6],
     invalidBytes: [0x81, 0x8A, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x9A, 0x9C, 0x9D, 0x9E, 0x9F, 0xCA, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF, 0xFB, 0xFC, 0xFF],
   },
   {
     encoding: 'iso-8859-8',
     lang: 'hebrew',
     validRange: [0xA0, 0xFF],
-    signature: [0xE0, 0xE5, 0xE9, 0xEC, 0xEE, 0xF0, 0xF8, 0xFA],
+    signature: [0xE0, 0xE5, 0xE9, 0xEC, 0xEE, 0xF0, 0xF8, 0xFA, 0xE3, 0xE4],
     invalidBytes: [0xA1, 0xBF, 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xFB, 0xFC, 0xFF],
   },
 
@@ -140,14 +138,14 @@ const SB_PROFILES = [
     encoding: 'windows-1256',
     lang: 'arabic',
     validRange: [0x80, 0xFF],
-    signature: [0xC7, 0xE1, 0xED, 0xE4, 0xE3, 0xD1, 0xE8, 0xC8, 0xC9, 0xCA],
+    signature: [0xC7, 0xE1, 0xED, 0xE4, 0xE3, 0xD1, 0xE8, 0xC8, 0xC9, 0xCA, 0xE6, 0xCC, 0xCD],
     invalidBytes: [],
   },
   {
     encoding: 'iso-8859-6',
     lang: 'arabic',
     validRange: [0xA0, 0xFF],
-    signature: [0xC7, 0xE1, 0xED, 0xE4, 0xE3, 0xD1, 0xE8, 0xC8],
+    signature: [0xC7, 0xE1, 0xED, 0xE4, 0xE3, 0xD1, 0xE8, 0xC8, 0xE6],
     invalidBytes: [0xA1, 0xA2, 0xA3, 0xA5, 0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xBC, 0xBD, 0xBE, 0xC0, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF],
   },
 
@@ -156,14 +154,21 @@ const SB_PROFILES = [
     encoding: 'windows-1257',
     lang: 'baltic',
     validRange: [0x80, 0xFF],
-    signature: [0xE0, 0xE7, 0xEA, 0xEB, 0xEE, 0xF0, 0xF3, 0xFC, 0xE2, 0xE8],
+    signature: [0xE0, 0xE7, 0xEA, 0xEB, 0xEE, 0xF0, 0xF3, 0xFC, 0xE2, 0xE8, 0xE4, 0xF5],
     invalidBytes: [0x81, 0x83, 0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x98, 0x9A, 0x9C, 0x9E, 0xA0],
   },
   {
     encoding: 'iso-8859-13',
     lang: 'baltic',
     validRange: [0xA0, 0xFF],
-    signature: [0xE0, 0xE7, 0xEA, 0xEB, 0xEE, 0xF0, 0xF3, 0xFC],
+    signature: [0xE0, 0xE7, 0xEA, 0xEB, 0xEE, 0xF0, 0xF3, 0xFC, 0xE2, 0xF5],
+    invalidBytes: [],
+  },
+  {
+    encoding: 'iso-8859-4',
+    lang: 'baltic',
+    validRange: [0xA0, 0xFF],
+    signature: [0xE0, 0xE1, 0xE8, 0xEE, 0xF5, 0xF3, 0xFA, 0xEC],
     invalidBytes: [],
   },
 
@@ -172,8 +177,20 @@ const SB_PROFILES = [
     encoding: 'windows-1258',
     lang: 'vietnamese',
     validRange: [0x80, 0xFF],
-    signature: [0xE0, 0xE1, 0xE2, 0xE3, 0xEA, 0xF4, 0xF5, 0xFD, 0xEC, 0xF9],
+    // Vietnamese-specific bytes in windows-1258:
+    // 0xD0=Đ(U+0110), 0xF0=đ(U+0111): ONLY in Vietnamese
+    // 0xD5=Ơ(U+01A0), 0xF5=ơ(U+01A1), 0xDD=Ư(U+01AF), 0xFD=ư(U+01B0): also distinctive
+    // 0xC3=Ă(U+0102), 0xE3=ă(U+0103): frequent in VI
+    // 0xE0=à, 0xEA=ê, 0xF4=ô: shared with Western but very frequent in VI text
+    signature: [0xE0, 0xF0, 0xE3, 0xD0, 0xF5, 0xFD, 0xC3, 0xD5, 0xDD, 0xCC, 0xD2, 0xDE, 0xEA, 0xF4],
     invalidBytes: [0x81, 0x8A, 0x8D, 0x8E, 0x8F, 0x90, 0x9A, 0x9D, 0x9E],
+  },
+  {
+    encoding: 'viscii',
+    lang: 'vietnamese',
+    validRange: [0x80, 0xFF],
+    signature: [0xB0, 0xB4, 0xB8, 0xC0, 0xC3, 0xC5, 0xC7, 0xCF, 0xD0, 0xD3, 0xD5],
+    invalidBytes: [],
   },
 
   // === Thai ===
@@ -181,15 +198,95 @@ const SB_PROFILES = [
     encoding: 'windows-874',
     lang: 'thai',
     validRange: [0x80, 0xFF],
-    signature: [0xA1, 0xB4, 0xC3, 0xC7, 0xCA, 0xD2, 0xD4, 0xE0, 0xE1, 0xE2, 0xE4],
+    signature: [0xA1, 0xB4, 0xC3, 0xC7, 0xCA, 0xD2, 0xD4, 0xE0, 0xE1, 0xE2, 0xE4, 0xC2, 0xB5],
     invalidBytes: [0x80, 0x81, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x98, 0x9C, 0x9D, 0x9E, 0x9F, 0xDB, 0xDC, 0xDD, 0xDE, 0xFC, 0xFD, 0xFE, 0xFF],
   },
   {
     encoding: 'iso-8859-11',
     lang: 'thai',
     validRange: [0xA0, 0xFF],
-    signature: [0xA1, 0xB4, 0xC3, 0xC7, 0xCA, 0xD2, 0xD4, 0xE0],
+    signature: [0xA1, 0xB4, 0xC3, 0xC7, 0xCA, 0xD2, 0xD4, 0xE0, 0xE1, 0xC2],
     invalidBytes: [0xDB, 0xDC, 0xDD, 0xDE, 0xFC, 0xFD, 0xFE, 0xFF],
+  },
+
+  // === Nordic / Scandinavian ===
+  {
+    encoding: 'iso-8859-10',
+    lang: 'nordic',
+    validRange: [0xA0, 0xFF],
+    signature: [0xE6, 0xF8, 0xE5, 0xE4, 0xF6, 0xFC, 0xE9, 0xE1, 0xED, 0xF3],
+    invalidBytes: [],
+  },
+
+  // === Celtic / Romanian ===
+  {
+    encoding: 'iso-8859-14',
+    lang: 'celtic',
+    validRange: [0xA0, 0xFF],
+    signature: [0xE0, 0xE1, 0xE2, 0xE3, 0xE9, 0xEE, 0xF4, 0xFA, 0xBD, 0xBE],
+    invalidBytes: [],
+  },
+
+  // === South-East European ===
+  {
+    encoding: 'iso-8859-16',
+    lang: 'south_european',
+    validRange: [0xA0, 0xFF],
+    signature: [0xE2, 0xE3, 0xE0, 0xE1, 0xE9, 0xEE, 0xF3, 0xFA, 0xBA, 0xBE, 0xAB, 0xBB],
+    invalidBytes: [],
+  },
+
+  // === Maltese / South European ===
+  {
+    encoding: 'iso-8859-3',
+    lang: 'maltese',
+    validRange: [0xA0, 0xFF],
+    signature: [0xE0, 0xE7, 0xE8, 0xE9, 0xF2, 0xF4, 0xF5, 0xFA, 0xAB, 0xBB],
+    invalidBytes: [0xA5, 0xAE, 0xBE, 0xC3, 0xD0, 0xE3, 0xF0],
+  },
+
+  // === DOS Code Pages ===
+  {
+    encoding: 'cp850',
+    lang: 'western',
+    validRange: [0x80, 0xFF],
+    // CP850 Western European DOS: heavily uses 0x80-0x8F range for accented chars
+    signature: [0x82, 0x83, 0x87, 0x88, 0x8B, 0x80, 0x81, 0x84, 0x85, 0x89, 0x8A, 0x8C],
+    invalidBytes: [],  // CP850 has no undefined bytes
+  },
+  {
+    encoding: 'cp852',
+    lang: 'central_european',
+    validRange: [0x80, 0xFF],
+    // CP852 Central European DOS: heavily uses 0xA0-0xAF and 0x9F+ range
+    signature: [0xA0, 0xFD, 0x9F, 0xA1, 0xA2, 0xA3, 0xA6, 0xA7, 0xAC, 0xB5, 0xB7, 0xD6],
+    invalidBytes: [],  // CP852 has no undefined bytes
+  },
+
+  // === Apple Macintosh Encodings ===
+  {
+    encoding: 'macintosh',
+    lang: 'western',
+    validRange: [0x80, 0xFF],
+    // MacRoman: heavily uses 0x80-0x9F for accented chars (unlike cp850 which also uses this range)
+    signature: [0x8E, 0x89, 0x8D, 0x90, 0x95, 0x80, 0x82, 0x83, 0x84, 0x85, 0x86, 0x88],
+    invalidBytes: [0xF0],  // MacRoman has one undefined byte at 0xF0
+  },
+  {
+    encoding: 'maccyrillic',
+    lang: 'cyrillic',
+    validRange: [0x80, 0xFF],
+    // MacCyrillic uses 0xE0+ range for Cyrillic, similar to windows-1251
+    signature: [0xE8, 0xF1, 0xEE, 0xF0, 0xF2, 0xE5, 0xE0, 0xE2, 0xEA, 0xE9, 0xED, 0xFB],
+    invalidBytes: [],
+  },
+  {
+    encoding: 'macgreek',
+    lang: 'greek',
+    validRange: [0x80, 0xFF],
+    // MacGreek uses 0xE0+ range for Greek lowercase
+    signature: [0xE1, 0xEC, 0xE5, 0xEE, 0xE8, 0xEB, 0xEF, 0xF3, 0xDD, 0xED, 0xF2, 0xA3],
+    invalidBytes: [0xFF],
   },
 ];
 
@@ -236,30 +333,38 @@ class UniversalDetector {
 
     if (!str.length) return;
 
-    // BOM detection
-    if (!this._gotData) {
-      this._bom += str;
-      if (this._bom.length >= 3 && this._bom.slice(0, 3) === '\xEF\xBB\xBF') {
-        this.result = { encoding: 'utf-8', confidence: 1.0 };
-      } else if (this._bom.length >= 4 && this._bom.slice(0, 4) === '\xFF\xFE\x00\x00') {
-        this.result = { encoding: 'utf-32le', confidence: 1.0 };
-      } else if (this._bom.length >= 4 && this._bom.slice(0, 4) === '\x00\x00\xFE\xFF') {
-        this.result = { encoding: 'utf-32be', confidence: 1.0 };
-      } else if (this._bom.length >= 4 && this._bom.slice(0, 4) === '\xFE\xFF\x00\x00') {
-        this.result = { encoding: 'x-iso-10646-ucs-4-3412', confidence: 1.0 };
-      } else if (this._bom.length >= 4 && this._bom.slice(0, 4) === '\x00\x00\xFF\xFE') {
-        this.result = { encoding: 'x-iso-10646-ucs-4-2143', confidence: 1.0 };
-      } else if (this._bom.length >= 2 && this._bom.slice(0, 2) === '\xFF\xFE') {
-        this.result = { encoding: 'utf-16le', confidence: 1.0 };
-      } else if (this._bom.length >= 2 && this._bom.slice(0, 2) === '\xFE\xFF') {
-        this.result = { encoding: 'utf-16be', confidence: 1.0 };
-      }
-      if (this._bom.length > 3) this._gotData = true;
-    }
+    this._gotData = true;
 
-    if (this.result.encoding && this.result.confidence > 0.0) {
-      this.done = true;
-      return;
+    // BOM detection: only check at the very start of the stream
+    const prevLen = this._rawInput ? this._rawInput.length - str.length : 0;
+    if (prevLen < 4) {
+      // Accumulate enough bytes to check for BOM
+      const bomCheck = this._rawInput ? this._rawInput.slice(0, Math.min(this._rawInput.length, 4)) : Buffer.alloc(0);
+      const bs = Array.from(bomCheck);
+      const b = (i) => bs[i] !== undefined ? bs[i] : -1;
+
+      if (bomCheck.length >= 4 && b(0) === 0xFF && b(1) === 0xFE && b(2) === 0x00 && b(3) === 0x00) {
+        this.result = { encoding: 'utf-32le', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 4 && b(0) === 0x00 && b(1) === 0x00 && b(2) === 0xFE && b(3) === 0xFF) {
+        this.result = { encoding: 'utf-32be', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 4 && b(0) === 0xFE && b(1) === 0xFF && b(2) === 0x00 && b(3) === 0x00) {
+        this.result = { encoding: 'x-iso-10646-ucs-4-3412', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 4 && b(0) === 0x00 && b(1) === 0x00 && b(2) === 0xFF && b(3) === 0xFE) {
+        this.result = { encoding: 'x-iso-10646-ucs-4-2143', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 3 && b(0) === 0xEF && b(1) === 0xBB && b(2) === 0xBF) {
+        this.result = { encoding: 'utf-8', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 2 && b(0) === 0xFF && b(1) === 0xFE) {
+        this.result = { encoding: 'utf-16le', confidence: 1.0 };
+        this.done = true; return;
+      } else if (bomCheck.length >= 2 && b(0) === 0xFE && b(1) === 0xFF) {
+        this.result = { encoding: 'utf-16be', confidence: 1.0 };
+        this.done = true; return;
+      }
     }
 
     // State transitions
@@ -300,7 +405,7 @@ class UniversalDetector {
 
   close() {
     if (this.done) return;
-    if (!this._bom || this._bom.length === 0) return;
+    if (!this._gotData && (!this._rawInput || this._rawInput.length === 0)) return;
     this.done = true;
 
     // Pure ASCII
@@ -331,21 +436,149 @@ class UniversalDetector {
       }
     }
 
+    // UTF-16 without BOM detection (for CJK and other non-ASCII-dominant text)
+    let utf16Result = null;
+    if (this._rawInput && this._rawInput.length >= 8) {
+      utf16Result = this._detectUtf16NoBom(this._rawInput);
+      if (utf16Result && utf16Result.confidence >= 0.85) {
+        this.result = utf16Result;
+        return this.result;
+      }
+    }
+
     // Single-byte detection (also runs when MBCS confidence is low)
     let sbResult = null;
     if (this._rawInput && this._rawInput.length > 0) {
       sbResult = this._detectSingleByte(this._rawInput);
     }
 
-    // Pick the better result between MBCS and single-byte
-    if (mbcsResult && sbResult) {
-      this.result = mbcsResult.confidence >= sbResult.confidence ? mbcsResult : sbResult;
-    } else if (mbcsResult) {
-      this.result = mbcsResult;
-    } else if (sbResult) {
-      this.result = sbResult;
+    // Pick the best result
+    const candidates = [mbcsResult, utf16Result, sbResult].filter(Boolean);
+    if (candidates.length > 0) {
+      this.result = candidates.reduce((best, cur) =>
+        cur.confidence > best.confidence ? cur : best
+      );
     }
     return this.result;
+  }
+
+  /**
+   * Detect UTF-16 without BOM by analyzing byte patterns.
+   * Handles CJK text where high bytes are NOT zero.
+   */
+  _detectUtf16NoBom(rawBuf) {
+    const len = rawBuf.length;
+    if (len < 8 || len % 2 !== 0) return null;
+
+    const pairs = len / 2;
+    let leNuls = 0, beNuls = 0;
+    let leValidCjk = 0, beValidCjk = 0;
+    let leValidBmp = 0, beValidBmp = 0;
+
+    for (let i = 0; i < len - 1; i += 2) {
+      const b0 = rawBuf[i];
+      const b1 = rawBuf[i + 1];
+
+      const leCp = b1 * 256 + b0; // UTF-16LE
+      const beCp = b0 * 256 + b1; // UTF-16BE
+
+      if (b1 === 0) leNuls++;
+      if (b0 === 0) beNuls++;
+
+      // Check CJK ranges for UTF-16LE
+      if (this._isCjkCodepoint(leCp)) leValidCjk++;
+      if (this._isValidBmpChar(leCp)) leValidBmp++;
+
+      // Check CJK ranges for UTF-16BE
+      if (this._isCjkCodepoint(beCp)) beValidCjk++;
+      if (this._isValidBmpChar(beCp)) beValidBmp++;
+    }
+
+    const leNulRatio = leNuls / pairs;
+    const beNulRatio = beNuls / pairs;
+    const leCjkRatio = leValidCjk / pairs;
+    const beCjkRatio = beValidCjk / pairs;
+    const leBmpRatio = leValidBmp / pairs;
+    const beBmpRatio = beValidBmp / pairs;
+
+    // Case 1: ASCII-dominant UTF-16 (high NUL ratio)
+    if (leNulRatio > 0.5 && leNulRatio > beNulRatio * 2 && leBmpRatio > 0.85) {
+      return { encoding: 'UTF-16', confidence: Math.min(leNulRatio * 0.95, 0.90) };
+    }
+    if (beNulRatio > 0.5 && beNulRatio > leNulRatio * 2 && beBmpRatio > 0.85) {
+      return { encoding: 'UTF-16', confidence: Math.min(beNulRatio * 0.95, 0.90) };
+    }
+
+    // Case 2: CJK-dominant UTF-16 (many CJK codepoints)
+    if (leCjkRatio > 0.4 && leCjkRatio > beCjkRatio * 2 && leBmpRatio > 0.85) {
+      return { encoding: 'UTF-16', confidence: Math.min(leCjkRatio * 0.90, 0.88) };
+    }
+    if (beCjkRatio > 0.4 && beCjkRatio > leCjkRatio * 2 && beBmpRatio > 0.85) {
+      return { encoding: 'UTF-16', confidence: Math.min(beCjkRatio * 0.90, 0.88) };
+    }
+
+    return null;
+  }
+
+  _isCjkCodepoint(cp) {
+    return (cp >= 0x4E00 && cp <= 0x9FFF)   // CJK Unified Ideographs
+        || (cp >= 0x3000 && cp <= 0x30FF)   // CJK Symbols, Hiragana, Katakana
+        || (cp >= 0xAC00 && cp <= 0xD7AF)   // Hangul Syllables
+        || (cp >= 0x3100 && cp <= 0x31FF)   // Bopomofo, Hangul Compatibility
+        || (cp >= 0xFF00 && cp <= 0xFFEF);  // Halfwidth/Fullwidth Forms
+  }
+
+  _isValidBmpChar(cp) {
+    if (cp === 0) return true;
+    if (cp < 0x0020 && cp !== 0x0009 && cp !== 0x000A && cp !== 0x000D) return false;
+    if (cp >= 0xD800 && cp <= 0xDFFF) return false; // surrogates
+    return true;
+  }
+
+  /**
+   * Strict UTF-8 byte-level validation.
+   * Returns true only if the entire buffer is valid UTF-8 with no overlong sequences.
+   */
+  _isValidUtf8(buf) {
+    let i = 0;
+    while (i < buf.length) {
+      const b = buf[i];
+      let seqLen;
+      if (b < 0x80) {
+        // ASCII
+        i++;
+        continue;
+      } else if ((b & 0xE0) === 0xC0) {
+        seqLen = 2;
+        if ((b & 0x1F) < 2) return false; // overlong
+      } else if ((b & 0xF0) === 0xE0) {
+        seqLen = 3;
+      } else if ((b & 0xF8) === 0xF0) {
+        seqLen = 4;
+        if (b > 0xF4) return false; // beyond Unicode range
+      } else {
+        return false; // invalid lead byte
+      }
+
+      if (i + seqLen > buf.length) return false;
+
+      for (let j = 1; j < seqLen; j++) {
+        if ((buf[i + j] & 0xC0) !== 0x80) return false; // invalid continuation byte
+      }
+
+      // Check for overlong sequences and surrogate pairs
+      if (seqLen === 3) {
+        const cp = ((b & 0x0F) << 12) | ((buf[i+1] & 0x3F) << 6) | (buf[i+2] & 0x3F);
+        if (cp < 0x0800) return false; // overlong
+        if (cp >= 0xD800 && cp <= 0xDFFF) return false; // surrogate
+      } else if (seqLen === 4) {
+        const cp = ((b & 0x07) << 18) | ((buf[i+1] & 0x3F) << 12) | ((buf[i+2] & 0x3F) << 6) | (buf[i+3] & 0x3F);
+        if (cp < 0x10000 || cp > 0x10FFFF) return false; // overlong or out of range
+      }
+
+      i += seqLen;
+    }
+    return true;
   }
 
   /**
@@ -356,6 +589,57 @@ class UniversalDetector {
    * 3. Use iconv-lite decode + Unicode range check as tiebreaker
    */
   _detectSingleByte(rawBuf) {
+    // Pre-check: strict UTF-8 byte-level validation
+    // This handles emoji, 4-byte chars, and other cases where the state machine
+    // might not accumulate enough multi-byte chars for high confidence
+    if (this._isValidUtf8(rawBuf)) {
+      // Count multi-byte chars to confirm it's non-trivial UTF-8
+      let mbCount = 0;
+      let seqCount = 0; // count of complete multi-byte sequences
+      let i = 0;
+      while (i < rawBuf.length) {
+        const b = rawBuf[i];
+        if (b < 0x80) { i++; continue; }
+        mbCount++;
+        // Determine sequence length
+        let seqLen = 1;
+        if ((b & 0xE0) === 0xC0) seqLen = 2;
+        else if ((b & 0xF0) === 0xE0) seqLen = 3;
+        else if ((b & 0xF8) === 0xF0) seqLen = 4;
+        if (i + seqLen <= rawBuf.length) seqCount++;
+        i += seqLen;
+      }
+      if (seqCount > 0) {
+        return { encoding: 'utf-8', confidence: 0.99 };
+      }
+    }
+
+    // Early binary guard: if ALL bytes are >= 0x80 (e.g. 0xFF-filled buffer),
+    // and no valid single-byte encoding profile can decode it cleanly, return null.
+    // This prevents misidentifying random binary as some encoding.
+    const allHighBytes = Array.from(rawBuf).every(b => b >= 0x80);
+    if (allHighBytes && rawBuf.length >= 4) {
+      // Check if any profile has 0% invalid bytes AND all bytes in valid range
+      let anyProfileCouldMatch = false;
+      const hist = new Uint32Array(256);
+      for (let j = 0; j < rawBuf.length; j++) hist[rawBuf[j]]++;
+      for (const profile of SB_PROFILES) {
+        let hasInvalid = false;
+        for (const inv of profile.invalidBytes) {
+          if (hist[inv] > 0) { hasInvalid = true; break; }
+        }
+        if (hasInvalid) continue;
+        // Check if all bytes fall in valid range
+        const [lo, hi] = profile.validRange;
+        let allInRange = true;
+        for (let b = 0x80; b <= 0xFF; b++) {
+          if (hist[b] > 0 && (b < lo || b > hi)) { allInRange = false; break; }
+        }
+        if (allInRange) { anyProfileCouldMatch = true; break; }
+      }
+      if (!anyProfileCouldMatch) return null;
+    }
+
     // Step 0: Try common DBCS encodings via iconv-lite roundtrip first
     // This catches cases where MBCS prober failed due to insufficient data
     // Only return early if extremely confident (avoids false positives)
@@ -373,8 +657,52 @@ class UniversalDetector {
     }
     if (totalHighBytes === 0) return null;
 
+    // Guard: if bytes are spread too uniformly across all 256 values (entropy too high),
+    // this is likely random binary data - return null instead of guessing
+    if (rawBuf.length >= 8) {
+      const uniqueHighBytes = Object.keys(
+        Array.from(rawBuf).filter(b => b >= 0x80).reduce((acc, b) => { acc[b] = 1; return acc; }, {})
+      ).length;
+      const highByteRatio = totalHighBytes / rawBuf.length;
+      // All-high-byte data with high variety = likely binary
+      if (highByteRatio >= 0.95 && uniqueHighBytes > 20) {
+        // Check if it could be a valid single-byte encoding by looking for invalid bytes
+        let anyProfileValid = false;
+        for (const profile of SB_PROFILES) {
+          let hasInvalid = false;
+          for (const inv of profile.invalidBytes) {
+            if (hist[inv] > 0) { hasInvalid = true; break; }
+          }
+          if (!hasInvalid) { anyProfileValid = true; break; }
+        }
+        if (!anyProfileValid) return null;
+      }
+    }
+
     let bestEnc = null;
     let bestScore = -Infinity;
+
+    // Pre-compute byte segment statistics for pattern matching
+    let bytes_80_9F = 0; // Windows-specific control area (used by CE/Baltic/etc.)
+    let bytes_A0_BF = 0; // Lower Latin/punctuation
+    let bytes_C0_DF = 0; // Upper Latin area
+    let bytes_E0_FF = 0; // Very high byte area
+
+    for (let b = 0x80; b <= 0x9F; b++) bytes_80_9F += hist[b];
+    for (let b = 0xA0; b <= 0xBF; b++) bytes_A0_BF += hist[b];
+    for (let b = 0xC0; b <= 0xDF; b++) bytes_C0_DF += hist[b];
+    for (let b = 0xE0; b <= 0xFF; b++) bytes_E0_FF += hist[b];
+
+    // Hebrew/Arabic detection heuristic:
+    // - All or nearly all high bytes are in 0xE0-0xFF range
+    // - No bytes in 0x80-0xDF range at all
+    // - AND we have enough high bytes to make this meaningful (> 10)
+    // Note: Western European (French, etc.) ALSO has bytes in 0xE0-0xFF (é=0xE9, etc.)
+    // but these ALSO typically have bytes in 0xC0-0xDF (à=0xE0 is >= 0xE0 but common western
+    // chars like Â=0xC2, Ä=0xC4, etc. are in 0xC0-0xDF).
+    // Hebrew text uses ONLY 0xE0-0xFA range for Hebrew letters, no 0xC0-0xDF.
+    const isHighOnly = bytes_80_9F === 0 && bytes_A0_BF === 0 && bytes_C0_DF === 0 &&
+                       bytes_E0_FF > 8 && totalHighBytes >= 10;
 
     for (const profile of SB_PROFILES) {
       // Step 1: Check for invalid bytes (instant disqualify)
@@ -411,8 +739,33 @@ class UniversalDetector {
         }
       }
 
-      // Composite score
-      const score = validRatio * 0.2 + sigRatio * 0.3 + langScore * 0.5;
+      // Composite score - langScore is the primary discriminator
+      let score = validRatio * 0.1 + sigRatio * 0.1 + langScore * 0.8;
+
+      // High-byte density constraint: languages like Cyrillic and Greek use ONLY high bytes
+      // for their script, so the high-byte ratio in authentic text should be very high.
+      // Real Cyrillic text typically has 50-90% high bytes. Western European text is usually <35%.
+      const highByteRatio = totalHighBytes / rawBuf.length;
+      if (highByteRatio < 0.40) {
+        if (profile.lang === 'cyrillic') {
+          // Gradual penalty: stronger the lower the ratio
+          score -= (0.40 - highByteRatio) * 3.0;
+        } else if (profile.lang === 'greek' || profile.lang === 'hebrew' ||
+                   profile.lang === 'arabic' || profile.lang === 'thai') {
+          score -= (0.40 - highByteRatio) * 2.0;
+        }
+      }
+
+      // Pattern-based bonus/penalty
+      if (isHighOnly) {
+        // All high bytes in 0xE0-0xFF: strongly favors Hebrew/Arabic, penalizes CE/Western
+        if (profile.lang === 'hebrew' || profile.lang === 'arabic') {
+          score += 0.3; // Strong bonus for Hebrew/Arabic
+        } else if (profile.lang === 'central_european' || profile.lang === 'western' ||
+                   profile.lang === 'baltic' || profile.lang === 'vietnamese') {
+          score -= 0.3; // Penalty for CE/Western that should use 0x80-0x9F range
+        }
+      }
 
       if (score > bestScore) {
         bestScore = score;
@@ -421,6 +774,55 @@ class UniversalDetector {
     }
 
     if (bestEnc && bestScore > 0.1) {
+      // Post-processing: for Cyrillic encodings, verify the decoded output actually contains
+      // Cyrillic Unicode characters. If not, fall through to let other encodings win.
+      const cyrillicEncodings = new Set(['windows-1251', 'koi8-r', 'koi8-u', 'iso-8859-5', 'cp866', 'koi8-ru', 'koi8-t']);
+      if (cyrillicEncodings.has(bestEnc) && iconv.encodingExists(bestEnc)) {
+        try {
+          const decoded = iconv.decode(rawBuf, bestEnc);
+          let cyrCount = 0, totalHigh = 0;
+          for (let i = 0; i < decoded.length; i++) {
+            const cp = decoded.charCodeAt(i);
+            if (cp > 0x7F && cp !== 0xFFFD) {
+              totalHigh++;
+              if (cp >= 0x0400 && cp <= 0x04FF) cyrCount++;
+            }
+          }
+          // If less than 40% of high chars are Cyrillic, don't claim this is Cyrillic
+          if (totalHigh > 0 && cyrCount / totalHigh < 0.4) {
+            // Re-run scoring excluding Cyrillic encodings to find the real match
+            let altBestEnc = null, altBestScore = -Infinity;
+            for (const profile of SB_PROFILES) {
+              if (cyrillicEncodings.has(profile.encoding)) continue;
+              let hasInvalid = false;
+              for (const inv of profile.invalidBytes) {
+                if (hist[inv] > 0) { hasInvalid = true; break; }
+              }
+              if (hasInvalid) continue;
+              let validHighBytes = 0;
+              const [lo, hi] = profile.validRange;
+              for (let b = lo; b <= hi; b++) validHighBytes += hist[b];
+              const altValidRatio = validHighBytes / totalHighBytes;
+              if (altValidRatio < 0.5) continue;
+              let altSigScore = 0;
+              for (const sigByte of profile.signature) altSigScore += hist[sigByte];
+              let altLangScore = 0;
+              if (iconv.encodingExists(profile.encoding)) {
+                try {
+                  const altDecoded = iconv.decode(rawBuf, profile.encoding);
+                  altLangScore = this._scoreLangMatch(altDecoded, profile.lang);
+                } catch (e) {}
+              }
+              const altScore = altValidRatio * 0.1 + (altSigScore / totalHighBytes) * 0.1 + altLangScore * 0.8;
+              if (altScore > altBestScore) { altBestScore = altScore; altBestEnc = profile.encoding; }
+            }
+            if (altBestEnc && altBestScore > 0.3) {
+              return { encoding: altBestEnc, confidence: Math.min(altBestScore * 1.2, 0.92) };
+            }
+          }
+        } catch (e) {}
+      }
+
       const sbResult = { encoding: bestEnc, confidence: Math.min(bestScore * 1.2, 0.95) };
       // Compare with DBCS roundtrip result: DBCS must be significantly better to win
       if (dbcsResult && dbcsResult.confidence > sbResult.confidence + 0.05) {
@@ -438,35 +840,165 @@ class UniversalDetector {
 
   /**
    * Score how well decoded text matches expected Unicode ranges for a language.
+   * Uses both general ranges AND distinctive character features to disambiguate
+   * between similar encodings (e.g. windows-1252 vs windows-1250).
    */
   _scoreLangMatch(decoded, lang) {
-    const langUnicodeRanges = {
-      cyrillic: [[0x0400, 0x04FF]],
-      western: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
-      central_european: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
-      greek: [[0x0370, 0x03FF]],
-      turkish: [[0x00C0, 0x00FF], [0x011E, 0x015F]],
-      hebrew: [[0x0590, 0x05FF]],
-      arabic: [[0x0600, 0x06FF]],
-      baltic: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
-      vietnamese: [[0x00C0, 0x00FF], [0x0100, 0x01B0], [0x1EA0, 0x1EFF]],
-      thai: [[0x0E00, 0x0E7F]],
+    // Distinctive character sets that strongly identify a specific language/encoding
+    // Format: { required: Set (at least one must appear for bonus), ranges: [...] }
+    const langProfiles = {
+      cyrillic: {
+        ranges: [[0x0400, 0x04FF], [0x0500, 0x052F]],
+        // Cyrillic letters а-я (most common lowercase)
+        distinctive: new Set([0x0430, 0x0431, 0x0432, 0x0433, 0x0434, 0x0435, 0x0436, 0x0437,
+                               0x0438, 0x0439, 0x043A, 0x043B, 0x043C, 0x043D, 0x043E, 0x043F,
+                               0x0440, 0x0441, 0x0442, 0x0443, 0x0444, 0x0445, 0x0446, 0x0447,
+                               0x0448, 0x0449, 0x044A, 0x044B, 0x044C, 0x044D, 0x044E, 0x044F]),
+        // Exclude Latin-1 Supplement (0x00C0-0x00FF): if we see these, it's NOT Cyrillic text
+        // Also exclude Greek range
+        excludeRanges: [[0x00C0, 0x00FF], [0x0370, 0x03FF], [0x0100, 0x017F]],
+      },
+      western: {
+        // Western: mainly 0x00C0-0x00FF, very few or no chars in 0x0100+
+        ranges: [[0x00C0, 0x00FF]],
+        // Should NOT have many chars in 0x100-0x17F (those are Central European)
+        excludeRanges: [[0x0100, 0x017F]],
+        // Western-ONLY distinctive chars, excluding those shared with Vietnamese/Turkish:
+        // Remove: à(E0, also in VI), â(E2, also in VI), ô(F4, also in VI)
+        // Keep: é è ê ë î ï ù û ß ç ñ É È Î (true French/Spanish/German only chars)
+        distinctive: new Set([0x00E9, 0x00E8, 0x00EA, 0x00EB, 0x00EF, 0x00EE, 0x00F9, 0x00FB,
+                               0x00DF, 0x00C9, 0x00C8, 0x00CA, 0x00CB, 0x00E7, 0x00F1, 0x00C0]),
+      },
+      central_european: {
+        // CE: mix of 0x00C0-0x00FF AND significant 0x0100-0x017F
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
+        // Strongly distinctive CE chars: č,š,ž,ř,ý,ě,ď,ť,ň and Polish ą,ę,ó,ś,ź,ż,ł,ń
+        distinctive: new Set([0x010D, 0x0161, 0x017E, 0x0159, 0x011B, 0x010F, 0x0165, 0x0148,
+                               0x0105, 0x0119, 0x015B, 0x017A, 0x017C, 0x0142, 0x0144,
+                               0x010C, 0x0160, 0x017D, 0x0158]),
+      },
+      greek: {
+        ranges: [[0x0370, 0x03FF], [0x1F00, 0x1FFF]],
+        distinctive: new Set([0x03B1, 0x03B2, 0x03B3, 0x03B4, 0x03B5, 0x03B6, 0x03B7, 0x03B8,
+                               0x03B9, 0x03BA, 0x03BB, 0x03BC, 0x03BD, 0x03BE, 0x03BF, 0x03C0,
+                               0x03C1, 0x03C2, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, 0x03C8,
+                               0x03C9, 0x0391, 0x0395, 0x0397, 0x0399, 0x039F, 0x03A5, 0x03A9]),
+      },
+      turkish: {
+        ranges: [[0x00C0, 0x00FF], [0x011E, 0x011F], [0x0130, 0x0131], [0x015E, 0x015F]],
+        // Turkish-ONLY distinctive chars: Ğğ(011E/F), Şş(015E/F), İı(0130/0131)
+        // ü ö are NOT distinctive (shared with German/Nordic)
+        distinctive: new Set([0x011E, 0x011F, 0x0130, 0x0131, 0x015E, 0x015F]),
+      },
+      hebrew: {
+        ranges: [[0x0590, 0x05FF], [0xFB1D, 0xFB4F]],
+        distinctive: new Set([0x05D0, 0x05D1, 0x05D2, 0x05D3, 0x05D4, 0x05D5, 0x05D6, 0x05D7,
+                               0x05D8, 0x05D9, 0x05DA, 0x05DB, 0x05DC, 0x05DD, 0x05DE, 0x05DF]),
+      },
+      arabic: {
+        ranges: [[0x0600, 0x06FF], [0x0750, 0x077F], [0xFB50, 0xFDFF], [0xFE70, 0xFEFF]],
+        distinctive: new Set([0x0627, 0x0628, 0x062A, 0x062B, 0x062C, 0x062E, 0x062F,
+                               0x0631, 0x0633, 0x0634, 0x0639, 0x0641, 0x0644, 0x0645,
+                               0x0646, 0x0647, 0x0648, 0x064A]),
+      },
+      baltic: {
+        // Baltic: 0x0100-0x017F area with specific letters (ā ē ģ ī ķ ļ ņ š ū ž)
+        ranges: [[0x0100, 0x017F]],
+        // Highly distinctive Baltic chars: Āā Ēē Ģģ Īī Ķķ Ļļ Ņņ Šš Ūū Žž
+        distinctive: new Set([0x0101, 0x0100, 0x0113, 0x0112, 0x0123, 0x0122, 0x012B, 0x012A,
+                               0x0137, 0x0136, 0x013C, 0x013B, 0x0146, 0x0145, 0x0161, 0x0160,
+                               0x016B, 0x016A, 0x017E, 0x017D]),
+      },
+      vietnamese: {
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x01B0], [0x1EA0, 0x1EFF]],
+        // Highly distinctive Vietnamese: Ơơ(U+01A0/01A1), Ưư(U+01AF/01B0), Đđ(U+0110/0111), Ăă(U+0102/0103)
+        // U+01A0, U+01A1, U+01AF, U+01B0 are ONLY used in Vietnamese!
+        distinctive: new Set([0x01A0, 0x01A1, 0x01AF, 0x01B0, 0x0110, 0x0111, 0x0102, 0x0103]),
+      },
+      thai: {
+        ranges: [[0x0E00, 0x0E7F]],
+        distinctive: new Set([0x0E01, 0x0E02, 0x0E03, 0x0E04, 0x0E05, 0x0E06, 0x0E07,
+                               0x0E14, 0x0E19, 0x0E1B, 0x0E23, 0x0E27, 0x0E2A, 0x0E2B, 0x0E2D]),
+      },
+      nordic: {
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
+        // True Nordic-exclusive chars: æ ø å Æ Ø Å (NOT ü ö ä, which are German/Turkish too)
+        distinctive: new Set([0x00E6, 0x00F8, 0x00E5, 0x00C6, 0x00D8, 0x00C5]),
+      },
+      celtic: {
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F], [0x1E00, 0x1EFF]],
+        distinctive: new Set([0x1E02, 0x1E03, 0x1E0A, 0x1E0B, 0x1E1E, 0x1E1F,
+                               0x1E40, 0x1E41, 0x1E56, 0x1E57, 0x1E60, 0x1E61]),
+      },
+      south_european: {
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
+        distinctive: new Set([0x0102, 0x0103, 0x015E, 0x015F, 0x0162, 0x0163]), // Romanian: Ăă Şş Ţţ
+      },
+      maltese: {
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
+        distinctive: new Set([0x010A, 0x010B, 0x0120, 0x0121, 0x0126, 0x0127, 0x017B, 0x017C]),
+      },
+      armenian: {
+        ranges: [[0x0530, 0x058F]],
+        distinctive: new Set([0x0531, 0x0532, 0x0533, 0x0534, 0x0535]),
+      },
+      georgian: {
+        ranges: [[0x10A0, 0x10FF]],
+        distinctive: new Set([0x10D0, 0x10D1, 0x10D2, 0x10D3, 0x10D4]),
+      },
     };
 
-    const ranges = langUnicodeRanges[lang];
-    if (!ranges) return 0.5;
+    const profile = langProfiles[lang];
+    if (!profile) return 0.5;
 
-    let matchCount = 0, highCharCount = 0;
+    let matchCount = 0, highCharCount = 0, replacementCount = 0;
+    let distinctiveCount = 0;
+    let excludeCount = 0;
+    const { ranges, distinctive, excludeRanges } = profile;
+
     for (let i = 0; i < decoded.length; i++) {
       const cp = decoded.charCodeAt(i);
-      if (cp > 0x7F && cp !== 0xFFFD) {
+      if (cp === 0xFFFD) { replacementCount++; continue; }
+      if (cp > 0x7F) {
         highCharCount++;
+        // Check main ranges
         for (const [lo, hi] of ranges) {
           if (cp >= lo && cp <= hi) { matchCount++; break; }
         }
+        // Check distinctive characters
+        if (distinctive && distinctive.has(cp)) distinctiveCount++;
+        // Check exclude ranges (chars that shouldn't appear)
+        if (excludeRanges) {
+          for (const [lo, hi] of excludeRanges) {
+            if (cp >= lo && cp <= hi) { excludeCount++; break; }
+          }
+        }
       }
     }
-    return highCharCount > 0 ? matchCount / highCharCount : 0;
+
+    // Penalize replacement characters heavily
+    if (replacementCount > 0 && decoded.length > 0) {
+      const replacementRatio = replacementCount / decoded.length;
+      if (replacementRatio > 0.05) return 0;
+    }
+
+    if (highCharCount === 0) return 0;
+
+    const rangeScore = matchCount / highCharCount;
+
+    // Distinctive character ratio: what fraction of high chars are distinctive?
+    // This is more reliable than absolute counts for variable-length texts
+    const distinctiveRatio = distinctiveCount / highCharCount;
+
+    // Bonus: 0.0 to 0.5 based on how many distinctive chars appear
+    // Using ratio-based approach prevents score inflation for longer texts
+    const distinctiveBonus = distinctiveRatio * 0.5;
+
+    // Penalty for exclude range chars
+    const excludePenalty = excludeRanges ? (excludeCount / highCharCount) * 0.5 : 0;
+
+    // Cap at 1.5 to prevent extreme values
+    return Math.max(0, Math.min(1.5, rangeScore + distinctiveBonus - excludePenalty));
   }
 
   /**
@@ -475,21 +1007,27 @@ class UniversalDetector {
    */
   _tryDbcsRoundtrip(rawBuf) {
     const dbcsEncodings = [
-      { enc: 'shift_jis', ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]] },
-      { enc: 'euc-jp',    ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF]] },
-      { enc: 'gbk',       ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]] },
-      { enc: 'gb2312',    ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]] },
-      { enc: 'big5',      ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]] },
-      { enc: 'euc-kr',    ranges: [[0xAC00, 0xD7AF], [0x3000, 0x303F]] },
-      { enc: 'cp932',     ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]] },
-      { enc: 'cp949',     ranges: [[0xAC00, 0xD7AF]] },
-      { enc: 'cp950',     ranges: [[0x4E00, 0x9FFF]] },
+      { enc: 'utf-8',     ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F], [0xAC00, 0xD7AF], [0x0080, 0x07FF]], minCjk: 1, allowReplace: false },
+      // GB18030 must come before gbk/gb2312 - it's a superset and handles 4-byte sequences
+      // minCjk:1 allows detection of text with GB18030-exclusive chars (CJK Extension A/B)
+      { enc: 'gb18030',   ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F], [0x2000, 0x206F], [0x3400, 0x4DBF], [0x20000, 0x2A6DF]], minCjk: 1, allowReplace: false },
+      { enc: 'gbk',       ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
+      { enc: 'gb2312',    ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
+      { enc: 'shift_jis', ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 2, allowReplace: false },
+      { enc: 'euc-jp',    ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF]], minCjk: 2, allowReplace: false },
+      { enc: 'big5',      ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
+      { enc: 'euc-kr',    ranges: [[0xAC00, 0xD7AF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
+      { enc: 'cp932',     ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 2, allowReplace: false },
+      { enc: 'cp949',     ranges: [[0xAC00, 0xD7AF], [0x3100, 0x31FF]], minCjk: 2, allowReplace: false },
+      { enc: 'cp950',     ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
     ];
 
     let bestEnc = null;
     let bestScore = 0;
+    // Track whether GB18030-exclusive chars were found
+    let gb18030ExclusiveScore = 0;
 
-    for (const { enc, ranges } of dbcsEncodings) {
+    for (const { enc, ranges, minCjk, allowReplace } of dbcsEncodings) {
       if (!iconv.encodingExists(enc)) continue;
       try {
         const decoded = iconv.decode(rawBuf, enc);
@@ -498,6 +1036,7 @@ class UniversalDetector {
         let replacements = 0;
         let cjkChars = 0;
         let highChars = 0;
+        let gb18030Exclusive = 0; // chars only in GB18030 extended range
         for (let i = 0; i < decoded.length; i++) {
           const cp = decoded.charCodeAt(i);
           if (cp === 0xFFFD) { replacements++; continue; }
@@ -506,10 +1045,23 @@ class UniversalDetector {
             for (const [lo, hi] of ranges) {
               if (cp >= lo && cp <= hi) { cjkChars++; break; }
             }
+            // GB18030-exclusive: Extension B (0x20000-0x2A6DF) and CJK Extension A (0x3400-0x4DBF)
+            if (enc === 'gb18030' && (
+              (cp >= 0x3400 && cp <= 0x4DBF) ||
+              (cp >= 0xF900 && cp <= 0xFAFF) ||
+              cp > 0xFFFF
+            )) {
+              gb18030Exclusive++;
+            }
           }
         }
 
         if (highChars === 0) continue;
+        if (!allowReplace && replacements > 0) continue;
+        if (cjkChars < minCjk) continue;
+
+        const cjkRatio = cjkChars / highChars;
+        if (cjkRatio < 0.65) continue;
 
         // Roundtrip check
         const reencoded = iconv.encode(decoded, enc);
@@ -519,19 +1071,17 @@ class UniversalDetector {
           if (rawBuf[i] === reencoded[i]) matchBytes++;
         }
         const roundtripRatio = matchBytes / rawBuf.length;
+        // Length difference penalty
+        const lenDiffPenalty = Math.abs(rawBuf.length - reencoded.length) / rawBuf.length;
 
-        const replacementPenalty = 1 - (replacements / decoded.length);
-        const cjkRatio = cjkChars / highChars;
+        const replacementPenalty = 1 - (replacements / (decoded.length || 1));
+        let score = roundtripRatio * 0.35 + cjkRatio * 0.45 + replacementPenalty * 0.2 - lenDiffPenalty * 0.1;
 
-        // Strong signal: high roundtrip + mostly CJK chars + few replacements
-        // Require at least 50% of high chars to be in expected CJK ranges
-        // AND at least 3 CJK characters to avoid false positives on short text
-        // Require: many CJK chars, OR significant ratio of high bytes in input
-        const highByteRatio = highChars / decoded.length;
-        if (cjkRatio < 0.8) continue;
-        if (cjkChars < 3) continue;
-        if (replacements > 0) continue;  // No replacement chars allowed for DBCS
-        const score = roundtripRatio * 0.3 + cjkRatio * 0.5 + replacementPenalty * 0.2;
+        // Bonus for GB18030 exclusive characters
+        if (enc === 'gb18030' && gb18030Exclusive > 0) {
+          score += 0.15;
+          gb18030ExclusiveScore = score;
+        }
 
         if (score > bestScore) {
           bestScore = score;
@@ -540,35 +1090,108 @@ class UniversalDetector {
       } catch (e) { continue; }
     }
 
-    if (bestEnc && bestScore > 0.6) {
-      return { encoding: bestEnc, confidence: Math.min(bestScore, 0.95) };
+    if (bestEnc && bestScore > 0.55) {
+      // If GB18030-exclusive chars were found, always return gb18030 (not gbk/gb2312)
+      if (gb18030ExclusiveScore > 0.55) {
+        return { encoding: 'gb18030', confidence: Math.min(gb18030ExclusiveScore, 0.97) };
+      }
+      // Map cp950 → big5, cp949 → euc-kr for cleaner output
+      const encMap = { 'cp950': 'big5', 'cp949': 'euc-kr' };
+      const finalEnc = encMap[bestEnc] || bestEnc;
+      return { encoding: finalEnc, confidence: Math.min(bestScore, 0.97) };
     }
     return null;
   }
 
   /**
    * Last-resort detection: try common encodings with iconv-lite roundtrip.
+   * Each entry has: encoding name + expected Unicode range hints for scoring.
    */
   _detectByRoundtrip(rawBuf) {
     const fallbacks = [
-      'cp437', 'cp737', 'cp775', 'cp850', 'cp852', 'cp855', 'cp857', 'cp858',
-      'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp869',
-      'macintosh', 'macroman', 'macgreek', 'maccyrillic', 'maciceland',
-      'macturkish', 'maccenteuro', 'maccroatian', 'macromania', 'macukraine',
-      'iso-8859-3', 'iso-8859-4', 'iso-8859-10', 'iso-8859-14', 'iso-8859-16',
+      // === DOS / OEM code pages ===
+      { enc: 'cp437',    lang: null,             ranges: [[0x0080, 0x024F]] },  // US DOS
+      { enc: 'cp737',    lang: 'greek',          ranges: [[0x0370, 0x03FF]] },  // Greek DOS
+      { enc: 'cp775',    lang: 'baltic',         ranges: [[0x0100, 0x017F]] },  // Baltic DOS
+      { enc: 'cp850',    lang: 'western',        ranges: [[0x00C0, 0x024F]] },  // Western Europe DOS
+      { enc: 'cp852',    lang: 'central_european', ranges: [[0x0100, 0x017F]] }, // CE DOS
+      { enc: 'cp855',    lang: 'cyrillic',       ranges: [[0x0400, 0x04FF]] },  // Cyrillic DOS
+      { enc: 'cp857',    lang: 'turkish',        ranges: [[0x00C0, 0x017F]] },  // Turkish DOS
+      { enc: 'cp858',    lang: 'western',        ranges: [[0x00C0, 0x024F]] },  // Western Europe + €
+      { enc: 'cp860',    lang: 'western',        ranges: [[0x00C0, 0x00FF]] },  // Portuguese DOS
+      { enc: 'cp861',    lang: 'western',        ranges: [[0x00C0, 0x00FF]] },  // Icelandic DOS
+      { enc: 'cp862',    lang: 'hebrew',         ranges: [[0x0590, 0x05FF]] },  // Hebrew DOS
+      { enc: 'cp863',    lang: 'western',        ranges: [[0x00C0, 0x00FF]] },  // Canadian French DOS
+      { enc: 'cp864',    lang: 'arabic',         ranges: [[0x0600, 0x06FF]] },  // Arabic DOS
+      { enc: 'cp865',    lang: 'nordic',         ranges: [[0x00C0, 0x00FF]] },  // Nordic DOS
+      { enc: 'cp866',    lang: 'cyrillic',       ranges: [[0x0400, 0x04FF]] },  // Cyrillic DOS (Russia)
+      { enc: 'cp869',    lang: 'greek',          ranges: [[0x0370, 0x03FF]] },  // Greek DOS 2
+      { enc: 'cp808',    lang: 'cyrillic',       ranges: [[0x0400, 0x04FF]] },  // Russian + €
+      { enc: 'cp720',    lang: 'arabic',         ranges: [[0x0600, 0x06FF]] },  // Arabic DOS
+
+      // === Macintosh encodings ===
+      { enc: 'macintosh',   lang: 'western',   ranges: [[0x00C0, 0x024F]] },
+      { enc: 'macroman',    lang: 'western',   ranges: [[0x00C0, 0x024F]] },
+      { enc: 'macgreek',    lang: 'greek',     ranges: [[0x0370, 0x03FF]] },
+      { enc: 'maccyrillic', lang: 'cyrillic',  ranges: [[0x0400, 0x04FF]] },
+      { enc: 'maciceland',  lang: 'western',   ranges: [[0x00C0, 0x00FF]] },
+      { enc: 'macturkish',  lang: 'turkish',   ranges: [[0x00C0, 0x017F]] },
+      { enc: 'maccenteuro', lang: 'central_european', ranges: [[0x0100, 0x017F]] },
+      { enc: 'maccroatian', lang: 'central_european', ranges: [[0x0100, 0x017F]] },
+      { enc: 'macromania',  lang: 'central_european', ranges: [[0x0100, 0x017F]] },
+      { enc: 'macukraine',  lang: 'cyrillic',  ranges: [[0x0400, 0x04FF]] },
+
+      // === Extended ISO-8859 ===
+      { enc: 'iso-8859-3',  lang: 'maltese',   ranges: [[0x0100, 0x017F]] },
+      { enc: 'iso-8859-4',  lang: 'baltic',    ranges: [[0x0100, 0x017F]] },
+      { enc: 'iso-8859-10', lang: 'nordic',    ranges: [[0x00C0, 0x017F]] },
+      { enc: 'iso-8859-14', lang: 'celtic',    ranges: [[0x00C0, 0x1EFF]] },
+      { enc: 'iso-8859-16', lang: 'south_european', ranges: [[0x00C0, 0x017F]] },
+
+      // === KOI8 variants ===
+      { enc: 'koi8-ru', lang: 'cyrillic', ranges: [[0x0400, 0x04FF]] },
+      { enc: 'koi8-t',  lang: 'cyrillic', ranges: [[0x0400, 0x04FF]] },
+
+      // === Other single-byte ===
+      { enc: 'armscii-8',       lang: 'armenian',   ranges: [[0x0530, 0x058F]] },
+      { enc: 'viscii',          lang: 'vietnamese', ranges: [[0x1EA0, 0x1EFF]] },
+      { enc: 'tcvn',            lang: 'vietnamese', ranges: [[0x1EA0, 0x1EFF]] },
+      { enc: 'rk1048',          lang: 'cyrillic',   ranges: [[0x0400, 0x04FF]] },
+      { enc: 'georgian-academy', lang: 'georgian',  ranges: [[0x10A0, 0x10FF]] },
+      { enc: 'georgian-ps',      lang: 'georgian',  ranges: [[0x10A0, 0x10FF]] },
+      { enc: 'pt154',            lang: 'cyrillic',   ranges: [[0x0400, 0x04FF]] },
+      { enc: 'mik',              lang: 'cyrillic',   ranges: [[0x0400, 0x04FF]] },
+      { enc: 'cp1124',           lang: 'cyrillic',   ranges: [[0x0400, 0x04FF]] },
+      { enc: 'cp1125',           lang: 'cyrillic',   ranges: [[0x0400, 0x04FF]] },
+      { enc: 'cp1133',           lang: null,         ranges: [[0x0E80, 0x0EFF]] },  // Lao
+      { enc: 'cp1161',           lang: 'thai',       ranges: [[0x0E00, 0x0E7F]] },
+      { enc: 'cp1162',           lang: 'thai',       ranges: [[0x0E00, 0x0E7F]] },
+      { enc: 'cp1163',           lang: 'vietnamese', ranges: [[0x1EA0, 0x1EFF]] },
+      { enc: 'hp-roman8',        lang: 'western',    ranges: [[0x00C0, 0x024F]] },
     ];
 
     let bestEnc = null;
     let bestScore = -Infinity;
 
-    for (const enc of fallbacks) {
+    for (const { enc, lang, ranges } of fallbacks) {
       if (!iconv.encodingExists(enc)) continue;
       try {
         const decoded = iconv.decode(rawBuf, enc);
         // Count replacement characters
         let replacements = 0;
+        let langMatch = 0;
+        let highChars = 0;
         for (let i = 0; i < decoded.length; i++) {
-          if (decoded.charCodeAt(i) === 0xFFFD) replacements++;
+          const cp = decoded.charCodeAt(i);
+          if (cp === 0xFFFD) { replacements++; continue; }
+          if (cp > 0x7F) {
+            highChars++;
+            if (ranges) {
+              for (const [lo, hi] of ranges) {
+                if (cp >= lo && cp <= hi) { langMatch++; break; }
+              }
+            }
+          }
         }
         // Roundtrip check
         const reencoded = iconv.encode(decoded, enc);
@@ -579,14 +1202,37 @@ class UniversalDetector {
         }
         const roundtripRatio = rawBuf.length > 0 ? matchBytes / rawBuf.length : 0;
         const replacementPenalty = rawBuf.length > 0 ? 1 - (replacements / rawBuf.length) : 1;
-        const score = roundtripRatio * 0.5 + replacementPenalty * 0.5;
+        const langScore = highChars > 0 ? langMatch / highChars : 0.5;
+        const score = roundtripRatio * 0.4 + replacementPenalty * 0.3 + langScore * 0.3;
 
         if (score > bestScore) { bestScore = score; bestEnc = enc; }
       } catch (e) { continue; }
     }
 
     if (bestEnc && bestScore > 0.5) {
-      return { encoding: bestEnc, confidence: Math.min(bestScore * 0.8, 0.85) };
+      // Additional guard: require that the decoded text has meaningful lang-range chars
+      // This prevents random binary data from being misidentified as some encoding
+      try {
+        const decoded = iconv.decode(rawBuf, bestEnc);
+        let highChars = 0, replacements = 0;
+        for (let i = 0; i < decoded.length; i++) {
+          const cp = decoded.charCodeAt(i);
+          if (cp === 0xFFFD) replacements++;
+          else if (cp > 0x7F) highChars++;
+        }
+        // If more than 5% replacement chars, this encoding is wrong
+        if (decoded.length > 0 && replacements / decoded.length > 0.05) {
+          return null;
+        }
+        // If no high chars at all, the data is pure ASCII - shouldn't reach here
+        const rawHighBytes = Array.from(rawBuf).filter(b => b >= 0x80).length;
+        if (highChars === 0 && rawHighBytes > 0) {
+          return null;
+        }
+      } catch (e) {
+        return null;
+      }
+      return { encoding: bestEnc, confidence: Math.min(bestScore * 0.85, 0.88) };
     }
     return null;
   }
