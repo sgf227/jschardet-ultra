@@ -1,5 +1,28 @@
 'use strict';
 
+// 兼容小程序等无 Node.js Buffer 的环境（参考 eastasia 做法）
+if (typeof Buffer === 'undefined') {
+  global.Buffer = {
+    isBuffer: function(obj) { return obj instanceof Uint8Array; },
+    from: function(arr) { return new Uint8Array(arr); },
+    alloc: function(size) { return new Uint8Array(size); },
+    concat: function(list) {
+      var len = list.reduce(function(s, b) { return s + b.length; }, 0);
+      var out = new Uint8Array(len);
+      var offset = 0;
+      list.forEach(function(b) { out.set(b, offset); offset += b.length; });
+      return out;
+    },
+    compare: function(a, b) {
+      for (var i = 0; i < Math.min(a.length, b.length); i++) {
+        if (a[i] < b[i]) return -1;
+        if (a[i] > b[i]) return 1;
+      }
+      return a.length - b.length;
+    }
+  };
+}
+
 const UniversalDetector = require('./universal-detector');
 const { normalizeEncoding, ENCODING_ALIASES } = require('./encoding-aliases');
 const iconv = require('iconv-lite');
