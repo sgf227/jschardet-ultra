@@ -259,7 +259,8 @@ const SB_PROFILES = [
     lang: 'central_european',
     validRange: [0x80, 0xFF],
     // CP852 Central European DOS: heavily uses 0xA0-0xAF and 0x9F+ range
-    signature: [0xA0, 0xFD, 0x9F, 0xA1, 0xA2, 0xA3, 0xA6, 0xA7, 0xAC, 0xB5, 0xB7, 0xD6],
+    // 移除0xFD(˝): 该字节在土耳其文(windows-1254)中是ı(极高频)，会导致误判
+    signature: [0xA0, 0x9F, 0xA1, 0xA2, 0xA3, 0xA6, 0xA7, 0xAC, 0xB5, 0xB7, 0xD6],
     invalidBytes: [],  // CP852 has no undefined bytes
   },
 
@@ -317,6 +318,53 @@ class UniversalDetector {
   feed(buf) {
     if (this.done) return;
 
+    // Very short all-high-byte input cannot be reliably identified
+    // e.g. single 0xFF byte, 2-byte 0xFF 0xFF etc.
+    let inputBuf = null;
+    if (Buffer.isBuffer(buf)) {
+      inputBuf = buf;
+    } else if (typeof buf === 'string') {
+      inputBuf = Buffer.alloc(buf.length);
+      for (let i = 0; i < buf.length; i++) inputBuf[i] = buf.charCodeAt(i) & 0xFF;
+    }
+    if (inputBuf) {
+      // For very short inputs (< 4 bytes), if ALL bytes are high bytes, we can't determine encoding
+      // EXCEPTION: known BOM sequences must not be blocked
+      const totalLen = (this._rawInput ? this._rawInput.length : 0) + inputBuf.length;
+      if (totalLen <= 3) {
+        const combined = this._rawInput ? Buffer.concat([this._rawInput, inputBuf]) : inputBuf;
+        const b0 = combined[0], b1 = combined[1], b2 = combined[2];
+        // Check if this could be a BOM sequence - don't block these
+        // BOM needs at least 2 bytes to be identifiable
+        const isBomCandidate = combined.length >= 2 && (
+          (b0 === 0xEF && b1 === 0xBB) ||          // UTF-8 BOM start
+          (b0 === 0xFF && b1 === 0xFE) ||           // UTF-16LE/UTF-32LE BOM start
+          (b0 === 0xFE && b1 === 0xFF) ||           // UTF-16BE BOM start
+          (b0 === 0x00 && b1 === 0x00 && b2 === 0xFE)  // UTF-32BE BOM start
+        );
+        if (!isBomCandidate) {
+          const allHigh = Array.from(inputBuf).every(b => b >= 0x80);
+          if (allHigh) {
+            // Check if this could be valid UTF-8 multi-byte sequence
+            const isValidUtf8Short = this._isValidUtf8(combined);
+            if (isValidUtf8Short) {
+              // Let it through - will be handled by UTF-8 detection
+            } else if (combined.length === 2) {
+              // 2-byte: could be a CJK character in GBK/Big5/Shift-JIS/EUC-KR
+              // Let it through for DBCS detection
+            } else {
+              // Mark as done with null result - too short to determine
+              this._gotData = true;
+              this._rawInput = this._rawInput ? Buffer.concat([this._rawInput, inputBuf]) : Buffer.from(inputBuf);
+              this.result = { encoding: null, confidence: 0 };
+              this.done = true;
+              return;
+            }
+          }
+        }
+      }
+    }
+
     let str;
     if (Buffer.isBuffer(buf)) {
       str = '';
@@ -343,11 +391,12 @@ class UniversalDetector {
       const bs = Array.from(bomCheck);
       const b = (i) => bs[i] !== undefined ? bs[i] : -1;
 
+      // UTF-32 BOM 检测必须先于 UTF-16（因为 UTF-32LE BOM 以 FF FE 00 00 开头）
       if (bomCheck.length >= 4 && b(0) === 0xFF && b(1) === 0xFE && b(2) === 0x00 && b(3) === 0x00) {
-        this.result = { encoding: 'utf-32le', confidence: 1.0 };
+        this.result = { encoding: 'UTF-32', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 4 && b(0) === 0x00 && b(1) === 0x00 && b(2) === 0xFE && b(3) === 0xFF) {
-        this.result = { encoding: 'utf-32be', confidence: 1.0 };
+        this.result = { encoding: 'UTF-32', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 4 && b(0) === 0xFE && b(1) === 0xFF && b(2) === 0x00 && b(3) === 0x00) {
         this.result = { encoding: 'x-iso-10646-ucs-4-3412', confidence: 1.0 };
@@ -359,10 +408,10 @@ class UniversalDetector {
         this.result = { encoding: 'utf-8', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 2 && b(0) === 0xFF && b(1) === 0xFE) {
-        this.result = { encoding: 'utf-16le', confidence: 1.0 };
+        this.result = { encoding: 'UTF-16', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 2 && b(0) === 0xFE && b(1) === 0xFF) {
-        this.result = { encoding: 'utf-16be', confidence: 1.0 };
+        this.result = { encoding: 'UTF-16', confidence: 1.0 };
         this.done = true; return;
       }
     }
@@ -408,8 +457,17 @@ class UniversalDetector {
     if (!this._gotData && (!this._rawInput || this._rawInput.length === 0)) return;
     this.done = true;
 
-    // Pure ASCII
+    // Pure ASCII - but first check if it could be UTF-16 with ASCII content
     if (this._inputState === 0) {
+      // UTF-16LE with ASCII content has alternating bytes: [ASCII, 0x00, ASCII, 0x00, ...]
+      // Check if rawInput could be UTF-16 before returning ascii
+      if (this._rawInput && this._rawInput.length >= 8) {
+        const utf16Check = this._detectUtf16NoBom(this._rawInput);
+        if (utf16Check && utf16Check.confidence >= 0.80) {
+          this.result = utf16Check;
+          return this.result;
+        }
+      }
       this.result = { encoding: 'ascii', confidence: 1.0 };
       return this.result;
     }
@@ -428,31 +486,126 @@ class UniversalDetector {
           encoding: mapProberResult(maxProber.getCharsetName()),
           confidence: maxProber.getConfidence()
         };
-        // High confidence MBCS → return directly
+        // High confidence MBCS → validate with roundtrip before returning directly
         if (maxConf >= 0.80) {
-          this.result = mbcsResult;
-          return this.result;
+          // Verify: decode with this encoding and check for replacement chars
+          const mbcsEnc = mbcsResult.encoding;
+          let mbcsValid = true;
+          if (this._rawInput && iconv.encodingExists(mbcsEnc)) {
+            try {
+              const decoded = iconv.decode(this._rawInput, mbcsEnc);
+              let repCount = 0;
+              for (let i = 0; i < decoded.length; i++) {
+                if (decoded.charCodeAt(i) === 0xFFFD) repCount++;
+              }
+              const repRatio = repCount / (decoded.length || 1);
+              // For truncated DBCS sequences (odd byte count ending with a high byte),
+              // be more lenient with replacement characters
+              const isTruncatedDbcs = this._rawInput.length % 2 === 1 &&
+                this._rawInput[this._rawInput.length - 1] >= 0x80;
+              const repTolerance = isTruncatedDbcs ? 0.30 : 0.10;
+              if (repRatio > repTolerance) {
+                // Too many replacement chars - prober may be wrong
+                mbcsValid = false;
+                mbcsResult.confidence *= (1 - repRatio); // Reduce confidence
+              }
+              // If all decoded characters are the same, the input is ambiguous
+              // (e.g. repeated 0xA1 0xA1 = full-width space in both EUC-JP and GBK)
+              if (mbcsValid && decoded.length > 0) {
+                const firstChar = decoded[0];
+                const allSame = decoded.split('').every(c => c === firstChar);
+                if (allSame && decoded.length >= 4) {
+                  mbcsValid = false;
+                  mbcsResult = null; // Cannot determine encoding
+                }
+              }
+            } catch (e) {}
+          }
+          if (mbcsValid) {
+            this.result = mbcsResult;
+            return this.result;
+          }
+          // Fall through to try other detection methods
         }
       }
     }
 
     // UTF-16 without BOM detection (for CJK and other non-ASCII-dominant text)
+    // But first verify it's not valid UTF-8 (UTF-8 takes priority)
     let utf16Result = null;
-    if (this._rawInput && this._rawInput.length >= 8) {
-      utf16Result = this._detectUtf16NoBom(this._rawInput);
-      if (utf16Result && utf16Result.confidence >= 0.85) {
-        this.result = utf16Result;
-        return this.result;
+    if (this._rawInput && this._rawInput.length >= 16) {
+      // Only try UTF-16 detection if the data is NOT valid UTF-8
+      const isUtf8 = this._isValidUtf8(this._rawInput);
+      if (!isUtf8) {
+        utf16Result = this._detectUtf16NoBom(this._rawInput);
+        if (utf16Result && utf16Result.confidence >= 0.50) {
+          this.result = utf16Result;
+          return this.result;
+        }
       }
     }
 
     // Single-byte detection (also runs when MBCS confidence is low)
+    // If MBCS prober was invalidated by roundtrip check, try DBCS roundtrip directly
+    // Also try when mbcsResult is null (MBCS prober didn't detect anything, e.g. very short CJK text)
+    let dbcsEarlyResult = null;
+    const mbcsInvalidated = mbcsResult && mbcsResult.confidence < 0.85;
+    const mbcsMissed = !mbcsResult && this._inputState === 2; // high-byte input but no MBCS result
+    if (this._rawInput && this._rawInput.length > 0 && (mbcsInvalidated || mbcsMissed)) {
+      // Don't try DBCS if the data is valid UTF-8 (emoji, etc.)
+      const isValidUtf8 = this._isValidUtf8(this._rawInput);
+      if (!isValidUtf8) {
+        // Check for random binary / sequential byte patterns before DBCS detection
+        const rawForCheck = this._rawInput;
+        const allHighForCheck = rawForCheck.length >= 4 && Array.from(rawForCheck).every(b => b >= 0x80);
+        let isBinaryData = false;
+        if (allHighForCheck) {
+          const hist3 = new Uint32Array(256);
+          for (let j = 0; j < rawForCheck.length; j++) hist3[rawForCheck[j]]++;
+          let uniqueHigh = 0;
+          for (let b = 0x80; b <= 0xFF; b++) if (hist3[b] > 0) uniqueHigh++;
+          if (uniqueHigh <= 2) {
+            isBinaryData = true;
+          } else if (rawForCheck.length >= 6) {
+            let seqCnt = 0;
+            for (let j = 1; j < rawForCheck.length; j++) {
+              const diff = rawForCheck[j] - rawForCheck[j - 1];
+              if (diff === 1 || diff === -1 || diff === 0) seqCnt++;
+            }
+            if (seqCnt / (rawForCheck.length - 1) > 0.7) isBinaryData = true;
+          }
+        }
+        if (!isBinaryData) {
+          dbcsEarlyResult = this._tryDbcsRoundtrip(this._rawInput);
+        }
+        if (dbcsEarlyResult) {
+          // For invalidated MBCS: lower threshold since we have evidence of wrong detection
+          // For missed MBCS on short text: use 0.97+ (near-perfect) to avoid false positives
+          // For missed MBCS on longer text: use 0.90
+          let threshold;
+          if (mbcsInvalidated) {
+            threshold = 0.80;
+          } else if (this._rawInput.length <= 4) {
+            threshold = 0.97; // Very short text needs near-perfect confidence
+          } else {
+            threshold = 0.90;
+          }
+          if (dbcsEarlyResult.confidence >= threshold) {
+            this.result = dbcsEarlyResult;
+            return this.result;
+          }
+        }
+      }
+    }
+
     let sbResult = null;
     if (this._rawInput && this._rawInput.length > 0) {
       sbResult = this._detectSingleByte(this._rawInput);
     }
 
     // Pick the best result
+    // Note: dbcsEarlyResult is only included if it met its threshold (already returned above if so)
+    // If we reach here, dbcsEarlyResult didn't meet the threshold, so don't include it
     const candidates = [mbcsResult, utf16Result, sbResult].filter(Boolean);
     if (candidates.length > 0) {
       this.result = candidates.reduce((best, cur) =>
@@ -474,6 +627,8 @@ class UniversalDetector {
     let leNuls = 0, beNuls = 0;
     let leValidCjk = 0, beValidCjk = 0;
     let leValidBmp = 0, beValidBmp = 0;
+    // Track invalid/surrogate code points
+    let leInvalid = 0, beInvalid = 0;
 
     for (let i = 0; i < len - 1; i += 2) {
       const b0 = rawBuf[i];
@@ -484,6 +639,10 @@ class UniversalDetector {
 
       if (b1 === 0) leNuls++;
       if (b0 === 0) beNuls++;
+
+      // Track invalid code points (surrogates, C0 control chars etc.)
+      if (!this._isValidBmpChar(leCp)) leInvalid++;
+      if (!this._isValidBmpChar(beCp)) beInvalid++;
 
       // Check CJK ranges for UTF-16LE
       if (this._isCjkCodepoint(leCp)) leValidCjk++;
@@ -500,21 +659,56 @@ class UniversalDetector {
     const beCjkRatio = beValidCjk / pairs;
     const leBmpRatio = leValidBmp / pairs;
     const beBmpRatio = beValidBmp / pairs;
+    const leInvalidRatio = leInvalid / pairs;
+    const beInvalidRatio = beInvalid / pairs;
 
     // Case 1: ASCII-dominant UTF-16 (high NUL ratio)
-    if (leNulRatio > 0.5 && leNulRatio > beNulRatio * 2 && leBmpRatio > 0.85) {
-      return { encoding: 'UTF-16', confidence: Math.min(leNulRatio * 0.95, 0.90) };
+    if (leNulRatio > 0.5 && leNulRatio > beNulRatio * 2 && leBmpRatio > 0.85 && leInvalidRatio < 0.05) {
+      // confidence: base 0.80 + NUL ratio bonus
+      const conf = Math.min(0.80 + leNulRatio * 0.15, 0.95);
+      return { encoding: 'UTF-16', confidence: conf };
     }
-    if (beNulRatio > 0.5 && beNulRatio > leNulRatio * 2 && beBmpRatio > 0.85) {
-      return { encoding: 'UTF-16', confidence: Math.min(beNulRatio * 0.95, 0.90) };
+    if (beNulRatio > 0.5 && beNulRatio > leNulRatio * 2 && beBmpRatio > 0.85 && beInvalidRatio < 0.05) {
+      const conf = Math.min(0.80 + beNulRatio * 0.15, 0.95);
+      return { encoding: 'UTF-16', confidence: conf };
     }
 
     // Case 2: CJK-dominant UTF-16 (many CJK codepoints)
-    if (leCjkRatio > 0.4 && leCjkRatio > beCjkRatio * 2 && leBmpRatio > 0.85) {
-      return { encoding: 'UTF-16', confidence: Math.min(leCjkRatio * 0.90, 0.88) };
+    // Lower threshold to 0.3 (from 0.4) to catch shorter CJK texts
+    if (leCjkRatio > 0.3 && leCjkRatio > beCjkRatio * 1.5 && leBmpRatio > 0.80 && leInvalidRatio < 0.05) {
+      // Guard: if data can be losslessly decoded as a DBCS encoding, it's NOT UTF-16
+      if (!this._isDbcsCandidateBytes(rawBuf)) {
+        const conf = Math.min(leCjkRatio * 0.5 + leBmpRatio * 0.5, 0.90);
+        return { encoding: 'UTF-16', confidence: conf };
+      }
     }
-    if (beCjkRatio > 0.4 && beCjkRatio > leCjkRatio * 2 && beBmpRatio > 0.85) {
-      return { encoding: 'UTF-16', confidence: Math.min(beCjkRatio * 0.90, 0.88) };
+    if (beCjkRatio > 0.3 && beCjkRatio > leCjkRatio * 1.5 && beBmpRatio > 0.80 && beInvalidRatio < 0.05) {
+      if (!this._isDbcsCandidateBytes(rawBuf)) {
+        const conf = Math.min(beCjkRatio * 0.5 + beBmpRatio * 0.5, 0.90);
+        return { encoding: 'UTF-16', confidence: conf };
+      }
+    }
+
+    // Case 3: Mixed Unicode (Hangul, Hiragana, etc.) - check overall BMP validity
+    // If one direction has very high BMP validity and very few invalids, it's likely UTF-16
+    if (leBmpRatio > 0.95 && leInvalidRatio < 0.02 && leBmpRatio > beBmpRatio + 0.1) {
+      // Extra check: at least some non-ASCII chars
+      const leHighCp = Array.from({ length: pairs }, (_, i) => {
+        const b0 = rawBuf[i * 2], b1 = rawBuf[i * 2 + 1];
+        return b1 * 256 + b0;
+      }).filter(cp => cp > 0x7F).length;
+      if (leHighCp / pairs > 0.3) {
+        return { encoding: 'UTF-16', confidence: 0.82 };
+      }
+    }
+    if (beBmpRatio > 0.95 && beInvalidRatio < 0.02 && beBmpRatio > leBmpRatio + 0.1) {
+      const beHighCp = Array.from({ length: pairs }, (_, i) => {
+        const b0 = rawBuf[i * 2], b1 = rawBuf[i * 2 + 1];
+        return b0 * 256 + b1;
+      }).filter(cp => cp > 0x7F).length;
+      if (beHighCp / pairs > 0.3) {
+        return { encoding: 'UTF-16', confidence: 0.82 };
+      }
     }
 
     return null;
@@ -582,7 +776,49 @@ class UniversalDetector {
   }
 
   /**
-   * Single-byte encoding detection:
+   * Check if the raw bytes look like a DBCS encoding (Shift-JIS, GBK, EUC-JP, etc.)
+   * rather than UTF-16. This prevents CJK DBCS text from being misidentified as UTF-16.
+   *
+   * Key insight: DBCS encodings have specific lead byte ranges:
+   * - Shift-JIS: lead bytes 0x81-0x9F or 0xE0-0xFC
+   * - GBK/GB2312: lead bytes 0x81-0xFE
+   * - EUC-JP: lead bytes 0xA1-0xFE
+   * - EUC-KR: lead bytes 0xA1-0xFE
+   * - Big5: lead bytes 0x81-0xFE
+   *
+   * If >60% of even-position bytes are in DBCS lead byte ranges AND
+   * the data can be decoded without replacement chars, it's likely DBCS.
+   */
+  _isDbcsCandidateBytes(buf) {
+    if (buf.length < 2) return false;
+    // Check Shift-JIS lead byte pattern: 0x81-0x9F or 0xE0-0xFC at even positions
+    let sjisLeads = 0, gbkLeads = 0;
+    const pairs = Math.floor(buf.length / 2);
+    for (let i = 0; i < buf.length - 1; i += 2) {
+      const b = buf[i];
+      if ((b >= 0x81 && b <= 0x9F) || (b >= 0xE0 && b <= 0xFC)) sjisLeads++;
+      if (b >= 0x81 && b <= 0xFE) gbkLeads++;
+    }
+    const sjisRatio = sjisLeads / pairs;
+    const gbkRatio = gbkLeads / pairs;
+
+    // If most even-position bytes are in DBCS lead ranges, it's DBCS
+    if (sjisRatio > 0.6 || gbkRatio > 0.8) {
+      // Verify with roundtrip
+      try {
+        const enc = sjisRatio > 0.6 ? 'shift_jis' : 'gbk';
+        const decoded = iconv.decode(buf, enc);
+        let rep = 0;
+        for (let i = 0; i < decoded.length; i++) {
+          if (decoded.charCodeAt(i) === 0xFFFD) rep++;
+        }
+        if (rep / (decoded.length || 1) < 0.05) return true;
+      } catch (e) {}
+    }
+    return false;
+  }
+
+  /**
    * 0. First try DBCS roundtrip (for cases where MBCS prober failed on short text)
    * 1. Eliminate candidates with invalid bytes
    * 2. Score remaining candidates by signature byte frequency
@@ -619,32 +855,55 @@ class UniversalDetector {
     // This prevents misidentifying random binary as some encoding.
     const allHighBytes = Array.from(rawBuf).every(b => b >= 0x80);
     if (allHighBytes && rawBuf.length >= 4) {
-      // Check if any profile has 0% invalid bytes AND all bytes in valid range
-      let anyProfileCouldMatch = false;
-      const hist = new Uint32Array(256);
-      for (let j = 0; j < rawBuf.length; j++) hist[rawBuf[j]]++;
-      for (const profile of SB_PROFILES) {
-        let hasInvalid = false;
-        for (const inv of profile.invalidBytes) {
-          if (hist[inv] > 0) { hasInvalid = true; break; }
-        }
-        if (hasInvalid) continue;
-        // Check if all bytes fall in valid range
-        const [lo, hi] = profile.validRange;
-        let allInRange = true;
-        for (let b = 0x80; b <= 0xFF; b++) {
-          if (hist[b] > 0 && (b < lo || b > hi)) { allInRange = false; break; }
-        }
-        if (allInRange) { anyProfileCouldMatch = true; break; }
+      // Check if the byte distribution looks like real text
+      // Real text has a characteristic distribution; random/uniform data does not
+      const hist2 = new Uint32Array(256);
+      for (let j = 0; j < rawBuf.length; j++) hist2[rawBuf[j]]++;
+
+      // Count unique high bytes
+      let uniqueHighBytes = 0;
+      for (let b = 0x80; b <= 0xFF; b++) {
+        if (hist2[b] > 0) uniqueHighBytes++;
       }
-      if (!anyProfileCouldMatch) return null;
+
+      // If only 1-2 unique byte values (e.g. all 0xFF), it's not real text
+      if (uniqueHighBytes <= 2) {
+        return null;
+      }
+
+      // Detect sequential/arithmetic byte patterns (e.g. 0x80,0x81,0x82,...) - not real text
+      if (rawBuf.length >= 6) {
+        let sequentialCount = 0;
+        for (let j = 1; j < rawBuf.length; j++) {
+          const diff = rawBuf[j] - rawBuf[j - 1];
+          if (diff === 1 || diff === -1 || diff === 0) sequentialCount++;
+        }
+        const seqRatio = sequentialCount / (rawBuf.length - 1);
+        if (seqRatio > 0.7) {
+          return null;
+        }
+      }
+
+      // If bytes are spread uniformly across ALL 128 high-byte values with similar frequency,
+      // it's likely random binary data
+      if (uniqueHighBytes > 60) {
+        // Very high entropy - check if any profile has invalid bytes
+        let anyProfileValid = false;
+        for (const profile of SB_PROFILES) {
+          let hasInvalid = false;
+          for (const inv of profile.invalidBytes) {
+            if (hist2[inv] > 0) { hasInvalid = true; break; }
+          }
+          if (!hasInvalid) { anyProfileValid = true; break; }
+        }
+        if (!anyProfileValid) return null;
+      }
     }
 
     // Step 0: Try common DBCS encodings via iconv-lite roundtrip first
     // This catches cases where MBCS prober failed due to insufficient data
-    // Only return early if extremely confident (avoids false positives)
     const dbcsResult = this._tryDbcsRoundtrip(rawBuf);
-    if (dbcsResult && dbcsResult.confidence >= 0.98) {
+    if (dbcsResult && dbcsResult.confidence >= 0.85) {
       return dbcsResult;
     }
 
@@ -755,6 +1014,20 @@ class UniversalDetector {
           score -= (0.40 - highByteRatio) * 2.0;
         }
       }
+      // 上限惩罚：高字节比例过高时惩罚西里尔/希腊/希伯来/阿拉伯
+      // 真正的西里尔文本高字节比例通常不超过85%（因为有标点、数字、空格）
+      // 泰文文本几乎全是高字节（>90%），因此高比例应该加分给泰文，惩罚西里尔
+      if (highByteRatio > 0.88) {
+        if (profile.lang === 'cyrillic') {
+          score -= (highByteRatio - 0.88) * 5.0;
+        } else if (profile.lang === 'greek' || profile.lang === 'hebrew' || profile.lang === 'arabic') {
+          score -= (highByteRatio - 0.88) * 3.0;
+        }
+        // 泰文在高字节比例极高时加分（但需要足够长的文本才可靠）
+        if (profile.lang === 'thai' && highByteRatio > 0.90 && rawBuf.length >= 20) {
+          score += (highByteRatio - 0.90) * 3.0;
+        }
+      }
 
       // Pattern-based bonus/penalty
       if (isHighOnly) {
@@ -824,6 +1097,32 @@ class UniversalDetector {
       }
 
       const sbResult = { encoding: bestEnc, confidence: Math.min(bestScore * 1.2, 0.95) };
+
+      // Post-process: prefer ISO-8859 over Windows code pages when the input
+      // doesn't contain bytes in the Windows-specific range (0x80-0x9F).
+      // This avoids false positives for "windows-1253" when "iso-8859-7" is more appropriate.
+      if (sbResult.encoding) {
+        const windowsToIso = {
+          'windows-1252': 'iso-8859-1',   // Western European
+          'windows-1253': 'iso-8859-7',   // Greek
+          'windows-1255': 'iso-8859-8',   // Hebrew
+          'windows-1254': 'iso-8859-9',   // Turkish
+          'windows-1250': 'iso-8859-2',   // Central European
+          'windows-1257': 'iso-8859-13',  // Baltic
+        };
+        const isoEquiv = windowsToIso[sbResult.encoding];
+        if (isoEquiv) {
+          // Check if any bytes in 0x80-0x9F range exist
+          let has80_9F = false;
+          for (let b = 0x80; b <= 0x9F; b++) {
+            if (hist[b] > 0) { has80_9F = true; break; }
+          }
+          if (!has80_9F) {
+            sbResult.encoding = isoEquiv;
+          }
+        }
+      }
+
       // Compare with DBCS roundtrip result: DBCS must be significantly better to win
       if (dbcsResult && dbcsResult.confidence > sbResult.confidence + 0.05) {
         return dbcsResult;
@@ -863,11 +1162,12 @@ class UniversalDetector {
         ranges: [[0x00C0, 0x00FF]],
         // Should NOT have many chars in 0x100-0x17F (those are Central European)
         excludeRanges: [[0x0100, 0x017F]],
-        // Western-ONLY distinctive chars, excluding those shared with Vietnamese/Turkish:
-        // Remove: à(E0, also in VI), â(E2, also in VI), ô(F4, also in VI)
-        // Keep: é è ê ë î ï ù û ß ç ñ É È Î (true French/Spanish/German only chars)
+        // Western-ONLY distinctive chars, including German-specific (ä Ä ö Ö ü Ü ß):
+        // French: é è ê ë î ï ù û ç ñ É È Î
+        // German: ä Ä ö Ö ü Ü ß (0xE4 0xC4 0xF6 0xD6 0xFC 0xDC 0xDF)
         distinctive: new Set([0x00E9, 0x00E8, 0x00EA, 0x00EB, 0x00EF, 0x00EE, 0x00F9, 0x00FB,
-                               0x00DF, 0x00C9, 0x00C8, 0x00CA, 0x00CB, 0x00E7, 0x00F1, 0x00C0]),
+                               0x00DF, 0x00C9, 0x00C8, 0x00CA, 0x00CB, 0x00E7, 0x00F1, 0x00C0,
+                               0x00E4, 0x00C4, 0x00F6, 0x00D6, 0x00FC, 0x00DC]),
       },
       central_european: {
         // CE: mix of 0x00C0-0x00FF AND significant 0x0100-0x017F
@@ -908,6 +1208,8 @@ class UniversalDetector {
         distinctive: new Set([0x0101, 0x0100, 0x0113, 0x0112, 0x0123, 0x0122, 0x012B, 0x012A,
                                0x0137, 0x0136, 0x013C, 0x013B, 0x0146, 0x0145, 0x0161, 0x0160,
                                0x016B, 0x016A, 0x017E, 0x017D]),
+        // Baltic text must NOT contain Cyrillic chars
+        excludeRanges: [[0x0400, 0x04FF]],
       },
       vietnamese: {
         ranges: [[0x00C0, 0x00FF], [0x0100, 0x01B0], [0x1EA0, 0x1EFF]],
@@ -1006,20 +1308,35 @@ class UniversalDetector {
    * Used when MBCS prober fails on short text but iconv-lite can still validate.
    */
   _tryDbcsRoundtrip(rawBuf) {
+    // 短文本（< 2字节）不做DBCS检测
+    if (rawBuf.length < 2) return null;
+
+    // Guard: single repeated byte value is ambiguous across many encodings
+    // Only apply this guard for 4+ bytes (2 bytes could be a single CJK char)
+    if (rawBuf.length >= 4) {
+      const firstByte = rawBuf[0];
+      let allSame = true;
+      for (let i = 1; i < rawBuf.length; i++) {
+        if (rawBuf[i] !== firstByte) { allSame = false; break; }
+      }
+      if (allSame && firstByte >= 0x80) return null;
+    }
+
     const dbcsEncodings = [
       { enc: 'utf-8',     ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F], [0xAC00, 0xD7AF], [0x0080, 0x07FF]], minCjk: 1, allowReplace: false },
+      // Japanese encodings before Chinese ones - Shift-JIS has distinctive byte ranges
+      { enc: 'shift_jis', ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 1, allowReplace: true },
+      { enc: 'euc-jp',    ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF61, 0xFF9F]], minCjk: 1, allowReplace: true },
+      // Korean
+      { enc: 'euc-kr',    ranges: [[0xAC00, 0xD7AF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
+      { enc: 'cp949',     ranges: [[0xAC00, 0xD7AF], [0x3100, 0x31FF]], minCjk: 1, allowReplace: false },
       // GB18030 must come before gbk/gb2312 - it's a superset and handles 4-byte sequences
-      // minCjk:1 allows detection of text with GB18030-exclusive chars (CJK Extension A/B)
-      { enc: 'gb18030',   ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F], [0x2000, 0x206F], [0x3400, 0x4DBF], [0x20000, 0x2A6DF]], minCjk: 1, allowReplace: false },
-      { enc: 'gbk',       ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
-      { enc: 'gb2312',    ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
-      { enc: 'shift_jis', ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 2, allowReplace: false },
-      { enc: 'euc-jp',    ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF]], minCjk: 2, allowReplace: false },
-      { enc: 'big5',      ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
-      { enc: 'euc-kr',    ranges: [[0xAC00, 0xD7AF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
-      { enc: 'cp932',     ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 2, allowReplace: false },
-      { enc: 'cp949',     ranges: [[0xAC00, 0xD7AF], [0x3100, 0x31FF]], minCjk: 2, allowReplace: false },
-      { enc: 'cp950',     ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 2, allowReplace: false },
+      { enc: 'gb18030',   ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F], [0x2000, 0x206F], [0x3400, 0x4DBF], [0x20000, 0x2A6DF]], minCjk: 1, allowReplace: true },
+      { enc: 'gbk',       ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: true },
+      { enc: 'gb2312',    ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: true },
+      { enc: 'big5',      ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
+      { enc: 'cp932',     ranges: [[0x3000, 0x30FF], [0x4E00, 0x9FFF], [0xFF00, 0xFFEF]], minCjk: 1, allowReplace: false },
+      { enc: 'cp950',     ranges: [[0x4E00, 0x9FFF], [0x3000, 0x303F]], minCjk: 1, allowReplace: false },
     ];
 
     let bestEnc = null;
@@ -1058,6 +1375,8 @@ class UniversalDetector {
 
         if (highChars === 0) continue;
         if (!allowReplace && replacements > 0) continue;
+        // For allowReplace=true (truncated sequences), still limit to at most 1 replacement
+        if (allowReplace && replacements > 1) continue;
         if (cjkChars < minCjk) continue;
 
         const cjkRatio = cjkChars / highChars;
@@ -1081,6 +1400,60 @@ class UniversalDetector {
         if (enc === 'gb18030' && gb18030Exclusive > 0) {
           score += 0.15;
           gb18030ExclusiveScore = score;
+        }
+
+        // EUC-JP bonus: SS2 prefix (0x8E) is a strong indicator of EUC-JP half-width katakana
+        if (enc === 'euc-jp') {
+          let ss2Count = 0;
+          for (let j = 0; j < rawBuf.length; j++) {
+            if (rawBuf[j] === 0x8E) ss2Count++;
+          }
+          const ss2Ratio = ss2Count / rawBuf.length;
+          if (ss2Ratio > 0.2) {
+            score += ss2Ratio * 0.3; // Strong bonus for SS2-heavy content
+          }
+        }
+
+        // CJK encodings require sufficient CJK chars relative to total text to avoid false
+        // positives on Western European text (which can sometimes roundtrip through CJK encodings).
+        // Real CJK text has CJK chars as a significant fraction of total chars.
+        const cjkEncodings = new Set(['gb18030', 'gbk', 'gb2312', 'big5', 'cp950', 'euc-kr', 'cp949', 'shift_jis', 'euc-jp', 'cp932']);
+        if (cjkEncodings.has(enc)) {
+          // gb18030Exclusive > 2: 至少3个GB18030专属字符才认为是真正的GB18030文本
+          // 1-2个可能是偶然命中（如土耳其文字节对碰巧落在CJK Extension A范围）
+          if (gb18030Exclusive <= 2) {
+            const cjkToTotal = cjkChars / (decoded.length || 1);
+            // Short text needs higher CJK ratio threshold to avoid false positives
+            const minCjkToTotal = rawBuf.length < 8 ? 0.65 : 0.25;
+            if (cjkToTotal < minCjkToTotal) {
+              // Not enough CJK chars relative to total text - likely not CJK text
+              continue;
+            }
+          }
+          // 对于变长编码（shift_jis/euc-jp/cp932），要求解码后字符数/字节数 < 0.65
+          // 真正的日文文本几乎全是双字节字符，字符数/字节数 ≈ 0.5
+          // 如果比例太高（> 0.65），说明原始数据主要是单字节编码，被误识别
+          if (enc === 'shift_jis' || enc === 'euc-jp' || enc === 'cp932') {
+            const charToBytesRatio = decoded.length / rawBuf.length;
+            if (charToBytesRatio > 0.65) {
+              continue;
+            }
+          }
+          // 泰文字节范围检查：如果原始字节主要在泰文范围(0xA1-0xDB)，则不应该判断为CJK编码
+          // 泰文(windows-874/TIS-620)字节范围是0xA1-0xFB，GBK可以将这些字节对解码为汉字
+          // 但真正的中文文本字节范围更广（0x81-0xFE），而泰文字节集中在0xA0-0xDF
+          if (enc === 'gbk' || enc === 'gb2312' || enc === 'gb18030' || enc === 'euc-jp' || enc === 'euc-kr' || enc === 'cp949') {
+            let thaiRangeBytes = 0;
+            for (let i = 0; i < rawBuf.length; i++) {
+              const b = rawBuf[i];
+              if (b >= 0xA1 && b <= 0xDB) thaiRangeBytes++;
+            }
+            const thaiRangeRatio = thaiRangeBytes / rawBuf.length;
+            // 如果超过75%的字节在泰文范围，很可能是泰文而非中文
+            if (thaiRangeRatio > 0.75) {
+              continue;
+            }
+          }
         }
 
         if (score > bestScore) {
@@ -1232,7 +1605,7 @@ class UniversalDetector {
       } catch (e) {
         return null;
       }
-      return { encoding: bestEnc, confidence: Math.min(bestScore * 0.85, 0.88) };
+      return { encoding: bestEnc === 'gb2312' ? 'gbk' : bestEnc, confidence: Math.min(bestScore * 0.85, 0.88) };
     }
     return null;
   }

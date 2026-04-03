@@ -4,7 +4,7 @@ const UniversalDetector = require('./universal-detector');
 const { normalizeEncoding, ENCODING_ALIASES } = require('./encoding-aliases');
 const iconv = require('iconv-lite');
 
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 
 /**
  * Detect the encoding of a Buffer or binary string.

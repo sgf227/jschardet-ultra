@@ -125,7 +125,7 @@ describe('jschardet-ultra', () => {
     });
 
     test('VERSION exists', () => {
-      expect(jschardet.VERSION).toBe('2.0.0');
+      expect(jschardet.VERSION).toBe('2.1.0');
     });
 
     test('encodingExists works', () => {

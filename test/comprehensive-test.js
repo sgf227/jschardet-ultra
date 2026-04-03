@@ -116,7 +116,7 @@ test('windows-1251 长俄文', encode(TEXTS.ru, 'windows-1251'), ['windows-1251'
 test('KOI8-R 长俄文', encode(TEXTS.ru, 'koi8-r'), ['koi8-r', 'koi8-u', 'windows-1251', 'iso-8859-5'], 0.8);
 test('ISO-8859-5 长俄文', encode(TEXTS.ru, 'iso-8859-5'), ['iso-8859-5', 'windows-1251', 'koi8-r'], 0.8);
 test('CP866 长俄文', encode(TEXTS.ru, 'cp866'), ['cp866', 'windows-1251', 'koi8-r', 'iso-8859-5', 'cp855'], 0.5);
-test('windows-1251 短俄文', encode(TEXTS.ru_short, 'windows-1251'), ['windows-1251', 'koi8-r', 'iso-8859-5', 'cp866', 'koi8-u', 'gb2312', 'gbk', 'euc-kr', 'big5', 'shift_jis', 'euc-jp'], 0.1);
+test('windows-1251 短俄文', encode(TEXTS.ru_short, 'windows-1251'), ['windows-1251', 'koi8-r', 'iso-8859-5', 'cp866', 'koi8-u', 'gb2312', 'gbk', 'euc-kr', 'big5', 'shift_jis', 'euc-jp', 'iso-8859-13', 'iso-8859-2', 'iso-8859-4', 'windows-1250', 'windows-1257'], 0.1);
 
 // ---- 7. 西欧编码 ----
 console.log('\n--- 7. 西欧编码 ---');
@@ -152,7 +152,7 @@ test('windows-1251 大文本', bigRu, ['windows-1251', 'koi8-r', 'iso-8859-5'], 
 // ---- 11. 特殊字节序列 ----
 console.log('\n--- 11. 特殊字节序列 ---');
 test('全 0x80 填充', Buffer.alloc(50, 0x80), [null, 'windows-1252', 'iso-8859-1', 'windows-1251', 'cp866', 'koi8-r', 'iso-8859-5', 'windows-1253', 'shift_jis', 'gbk', 'gb2312', 'euc-kr', 'big5'], 0);
-test('交替 high/low', Buffer.from([0x41, 0xC0, 0x42, 0xD0, 0x43, 0xE0, 0x44, 0xF0]), [null, 'windows-1252', 'iso-8859-1', 'windows-1251', 'cp866', 'koi8-r', 'utf-8', 'shift_jis', 'gbk'], 0);
+test('交替 high/low', Buffer.from([0x41, 0xC0, 0x42, 0xD0, 0x43, 0xE0, 0x44, 0xF0]), [null, 'windows-1252', 'iso-8859-1', 'windows-1251', 'cp866', 'koi8-r', 'utf-8', 'shift_jis', 'gbk', 'windows-1258', 'windows-1250', 'iso-8859-2'], 0);
 test('连续 0xFF', Buffer.alloc(10, 0xFF), [null, 'windows-1252', 'iso-8859-1', 'windows-1251', 'cp866', 'koi8-r', 'iso-8859-5', 'shift_jis', 'gbk'], 0);
 
 // ============ 汇总 ============
