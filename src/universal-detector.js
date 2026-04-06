@@ -68,6 +68,16 @@ const SB_PROFILES = [
     signature: [0xA0, 0xAE, 0xA8, 0xA5, 0xAD, 0xE2, 0xE1, 0xA2, 0xAA, 0xA9, 0xAF, 0xA4],
     invalidBytes: [],
   },
+  {
+    encoding: 'cp855',
+    lang: 'cyrillic',
+    validRange: [0x80, 0xFF],
+    // CP855 Cyrillic DOS: Russian letters use 0xA0-0xEF range
+    // Most frequent in Russian: а=0xA0, о=0xD6, и=0xA6, е=0xA4, н=0xB7, т=0xDE, с=0xE1, р=0xE3, в=0xA8, к=0xC6
+    // These bytes are CP855-exclusive (NOT in cp869 Greek DOS)
+    signature: [0xA0, 0xD6, 0xA6, 0xA4, 0xB7, 0xDE, 0xE1, 0xE3, 0xA8, 0xC6, 0xD4, 0xD2, 0xA2, 0xD8, 0xD0, 0xE5],
+    invalidBytes: [],
+  },
 
   // === Western European ===
   {
@@ -104,7 +114,11 @@ const SB_PROFILES = [
     encoding: 'iso-8859-2',
     lang: 'central_european',
     validRange: [0xA0, 0xFF],
-    signature: [0xE1, 0xE9, 0xED, 0xF3, 0xFA, 0xE8, 0xF8, 0xF9, 0xF6, 0xFC],
+    // ISO-8859-2 CE-specific bytes: Polish ą=0xB1, ż=0xBF, ś=0xA6, ź=0xBC, ł=0xB3, ń=0xF1, ć=0xE6
+    // Czech/Slovak: š=0xB9, č=0xE8, ř=0xF8, ž=0xBE, ě=0xEC, ý=0xFD
+    // Hungarian: ő=0x91(not), á=0xE1, é=0xE9, í=0xED, ó=0xF3, ö=0xF6, ő=0x151(cp), ü=0xFC
+    // Most distinctive: 0xA6(Ś), 0xB1(ą), 0xBF(ż), 0xE6(ć), 0xF1(ń) - unique to CE
+    signature: [0xA6, 0xB1, 0xBF, 0xE6, 0xF1, 0xA3, 0xB3, 0xA9, 0xB9, 0xAC, 0xBC, 0xCA, 0xEA, 0xC6, 0xD3, 0xF3],
     invalidBytes: [],
   },
 
@@ -255,16 +269,21 @@ const SB_PROFILES = [
     encoding: 'iso-8859-16',
     lang: 'south_european',
     validRange: [0xA0, 0xFF],
-    signature: [0xE2, 0xE3, 0xE0, 0xE1, 0xE9, 0xEE, 0xF3, 0xFA, 0xBA, 0xBE, 0xAB, 0xBB],
+    // ISO-8859-16 Romanian-specific bytes:
+    // Ș=0xAA, ș=0xBA, Ț=0xDE, ț=0xFE (modern Romanian, UNIQUE to iso-8859-16)
+    // Ă=0xC3, ă=0xE3, Â=0xC2, â=0xE2, Î=0xCE, î=0xEE
+    signature: [0xAA, 0xBA, 0xDE, 0xFE, 0xC3, 0xE3, 0xC2, 0xE2, 0xCE, 0xEE],
     invalidBytes: [],
   },
 
   // === Maltese / South European ===
   {
     encoding: 'iso-8859-3',
-    lang: 'maltese',
+    lang: 'turkish',
     validRange: [0xA0, 0xFF],
-    signature: [0xE0, 0xE7, 0xE8, 0xE9, 0xF2, 0xF4, 0xF5, 0xFA, 0xAB, 0xBB],
+    // ISO-8859-3 Turkish-specific bytes: İ=0xA9, Ş=0xAA, Ğ=0xAB, ş=0xBA, ğ=0xBB, ı=0xB9, Ç=0xC7, ç=0xE7
+    // These bytes are UNIQUE to iso-8859-3 (not present in iso-8859-2)
+    signature: [0xA9, 0xAA, 0xAB, 0xB9, 0xBA, 0xBB, 0xC7, 0xE7, 0xD6, 0xF6, 0xDC, 0xFC],
     invalidBytes: [0xA5, 0xAE, 0xBE, 0xC3, 0xD0, 0xE3, 0xF0],
   },
 
@@ -282,9 +301,35 @@ const SB_PROFILES = [
     lang: 'central_european',
     validRange: [0x80, 0xFF],
     // CP852 Central European DOS: heavily uses 0xA0-0xAF and 0x9F+ range
-    // 移除0xFD(˝): 该字节在土耳其文(windows-1254)中是ı(极高频)，会导致误判
     signature: [0xA0, 0x9F, 0xA1, 0xA2, 0xA3, 0xA6, 0xA7, 0xAC, 0xB5, 0xB7, 0xD6],
     invalidBytes: [],  // CP852 has no undefined bytes
+  },
+  {
+    encoding: 'cp857',
+    lang: 'turkish',
+    validRange: [0x80, 0xFF],
+    // CP857 Turkish DOS: Ç=0x80, ü=0x81, ç=0x87, ı=0x8D, İ=0x98, Ü=0x9A, Ş=0x9E, ş=0x9F, Ğ=0xA6, ğ=0xA7
+    // These bytes are Turkish-distinctive and NOT present in cp850 (Western DOS)
+    signature: [0x80, 0x81, 0x87, 0x8D, 0x94, 0x98, 0x99, 0x9A, 0x9E, 0x9F, 0xA6, 0xA7],
+    invalidBytes: [],  // CP857 has no undefined bytes
+  },
+  {
+    encoding: 'cp862',
+    lang: 'hebrew',
+    validRange: [0x80, 0xFF],
+    // CP862 Hebrew DOS: Hebrew letters are at 0x80-0x9A range
+    // These bytes decode to Hebrew Unicode chars (0x05D0-0x05EA)
+    signature: [0x80, 0x81, 0x83, 0x84, 0x85, 0x86, 0x87, 0x89, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x94, 0x96, 0x97, 0x98, 0x99, 0x9A],
+    invalidBytes: [],  // CP862 has no undefined bytes
+  },
+  {
+    encoding: 'cp869',
+    lang: 'greek',
+    validRange: [0x80, 0xFF],
+    // CP869 Greek DOS: use bytes UNIQUE to cp869 (not overlapping with cp855 Cyrillic)
+    // 0x9B, 0x9D, 0x9F, 0xA3, 0xA5, 0xAA, 0xDD, 0xE4, 0xE6, 0xEA, 0xEE, 0xF2, 0xF3 are cp869-exclusive
+    signature: [0x9B, 0x9D, 0x9F, 0xA3, 0xA5, 0xAA, 0xDD, 0xE4, 0xE6, 0xEA, 0xEE, 0xF2, 0xF3],
+    invalidBytes: [],  // CP869 has no undefined bytes
   },
 
   // === Apple Macintosh Encodings ===
@@ -311,6 +356,43 @@ const SB_PROFILES = [
     // MacGreek uses 0xE0+ range for Greek lowercase
     signature: [0xE1, 0xEC, 0xE5, 0xEE, 0xE8, 0xEB, 0xEF, 0xF3, 0xDD, 0xED, 0xF2, 0xA3],
     invalidBytes: [0xFF],
+  },
+  {
+    encoding: 'macturkish',
+    lang: 'turkish',
+    validRange: [0x80, 0xFF],
+    // MacTurkish: Ğ=0xDA, ğ=0xDB, İ=0xDC, ı=0xDD, Ş=0xDE, ş=0xDF
+    // These 0xDA-0xDF bytes are ONLY used in MacTurkish for Turkish-specific chars
+    signature: [0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF, 0x82, 0x85, 0x86, 0x8D, 0x9A, 0x9F],
+    invalidBytes: [],
+  },
+  {
+    encoding: 'maccenteuro',
+    lang: 'central_european',
+    validRange: [0x80, 0xFF],
+    // MacCentEuro: Polish/Czech/Slovak chars at 0x80-0xFD
+    // Ą=0x84, ą=0x88, Ć=0x8C, ć=0x8D, Ź=0x8F, ź=0x90, Ó=0xEE, Ś=0xE5, ś=0xE6, Ż=0xFB, ż=0xFD, Ł=0xFC, ł=0xB8
+    signature: [0x84, 0x88, 0x8C, 0x8D, 0x8F, 0x90, 0xA2, 0xAB, 0xB8, 0xC1, 0xC4, 0xE5, 0xE6, 0xEE, 0xFB, 0xFC, 0xFD],
+    invalidBytes: [],
+  },
+  {
+    encoding: 'maccroatian',
+    lang: 'central_european',
+    validRange: [0x80, 0xFF],
+    // MacCroatian: Croatian/South Slavic chars
+    // ó=0x97, ć=0xE6 are most common; very few high bytes in typical Croatian text
+    signature: [0x97, 0xE6, 0x8D, 0x80, 0x81, 0x82, 0x83],
+    invalidBytes: [],
+  },
+  {
+    encoding: 'armscii-8',
+    lang: 'armenian',
+    validRange: [0xA0, 0xFF],
+    // ARMSCII-8 Armenian: 0xA1 and 0xFF are the only invalid bytes
+    // Use signature bytes that are NOT in CE/Western encoding signatures
+    // These bytes decode to Armenian letters (0x0530-0x058F Unicode range)
+    signature: [0xBB, 0xBD, 0xC1, 0xC7, 0xC9, 0xCB, 0xCD, 0xCF, 0xD1, 0xD5, 0xD9, 0xDB, 0xDD, 0xEB, 0xEF],
+    invalidBytes: [0xA1, 0xFF],
   },
 ];
 
@@ -416,10 +498,10 @@ class UniversalDetector {
 
       // UTF-32 BOM 检测必须先于 UTF-16（因为 UTF-32LE BOM 以 FF FE 00 00 开头）
       if (bomCheck.length >= 4 && b(0) === 0xFF && b(1) === 0xFE && b(2) === 0x00 && b(3) === 0x00) {
-        this.result = { encoding: 'UTF-32', confidence: 1.0 };
+        this.result = { encoding: 'utf-32le', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 4 && b(0) === 0x00 && b(1) === 0x00 && b(2) === 0xFE && b(3) === 0xFF) {
-        this.result = { encoding: 'UTF-32', confidence: 1.0 };
+        this.result = { encoding: 'utf-32be', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 4 && b(0) === 0xFE && b(1) === 0xFF && b(2) === 0x00 && b(3) === 0x00) {
         this.result = { encoding: 'x-iso-10646-ucs-4-3412', confidence: 1.0 };
@@ -431,10 +513,10 @@ class UniversalDetector {
         this.result = { encoding: 'utf-8', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 2 && b(0) === 0xFF && b(1) === 0xFE) {
-        this.result = { encoding: 'UTF-16', confidence: 1.0 };
+        this.result = { encoding: 'utf-16le', confidence: 1.0 };
         this.done = true; return;
       } else if (bomCheck.length >= 2 && b(0) === 0xFE && b(1) === 0xFF) {
-        this.result = { encoding: 'UTF-16', confidence: 1.0 };
+        this.result = { encoding: 'utf-16be', confidence: 1.0 };
         this.done = true; return;
       }
     }
@@ -1021,6 +1103,13 @@ class UniversalDetector {
         }
       }
 
+      // Special guard for armscii-8: requires signature bytes to be present.
+      // Without this, any Western text with 0xE0/0xE9 bytes would be misidentified
+      // as Armenian (since these bytes decode to Armenian Unicode chars in armscii-8).
+      if (profile.encoding === 'armscii-8' && sigScore === 0) {
+        continue;
+      }
+
       // Composite score - langScore is the primary discriminator
       let score = validRatio * 0.1 + sigRatio * 0.1 + langScore * 0.8;
 
@@ -1256,8 +1345,11 @@ class UniversalDetector {
                                0x1E40, 0x1E41, 0x1E56, 0x1E57, 0x1E60, 0x1E61]),
       },
       south_european: {
-        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
-        distinctive: new Set([0x0102, 0x0103, 0x015E, 0x015F, 0x0162, 0x0163]), // Romanian: Ăă Şş Ţţ
+        ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F], [0x0218, 0x021B]],
+        // Romanian: Ăă(0x102/103), Şş(0x15E/15F), Ţţ(0x162/163) - old style
+        // Romanian: Șș(0x218/219), Țț(0x21A/21B) - modern style (ONLY in Romanian!)
+        distinctive: new Set([0x0102, 0x0103, 0x015E, 0x015F, 0x0162, 0x0163,
+                               0x0218, 0x0219, 0x021A, 0x021B]), // Romanian-exclusive
       },
       maltese: {
         ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
@@ -1265,7 +1357,14 @@ class UniversalDetector {
       },
       armenian: {
         ranges: [[0x0530, 0x058F]],
-        distinctive: new Set([0x0531, 0x0532, 0x0533, 0x0534, 0x0535]),
+        // Armenian letters: Ա=0x531, Բ=0x532, Գ=0x533, Դ=0x534, Ե=0x535, Զ=0x536, Է=0x537, Ը=0x538, Թ=0x539, Ժ=0x53A
+        // Lowercase: ա=0x561, բ=0x562, գ=0x563, դ=0x564, ե=0x565, զ=0x566, է=0x567, ը=0x568, թ=0x569
+        // Most common: ա=0x561, ն=0x576, ե=0x565, ր=0x580, ի=0x56B, ո=0x578, ս=0x57D, տ=0x57F
+        distinctive: new Set([0x0531, 0x0532, 0x0533, 0x0534, 0x0535, 0x0536, 0x0537, 0x0538, 0x0539,
+                               0x0561, 0x0562, 0x0563, 0x0564, 0x0565, 0x0566, 0x0567, 0x0568, 0x0569,
+                               0x056A, 0x056B, 0x056C, 0x056D, 0x056E, 0x056F, 0x0570, 0x0571, 0x0572,
+                               0x0573, 0x0574, 0x0575, 0x0576, 0x0577, 0x0578, 0x0579, 0x057A, 0x057B,
+                               0x057C, 0x057D, 0x057E, 0x057F, 0x0580]),
       },
       georgian: {
         ranges: [[0x10A0, 0x10FF]],
@@ -1343,6 +1442,26 @@ class UniversalDetector {
         if (rawBuf[i] !== firstByte) { allSame = false; break; }
       }
       if (allSame && firstByte >= 0x80) return null;
+    }
+
+    // Guard: for very short texts (< 14 bytes), check if the bytes look like
+    // single-byte Cyrillic/Western encoding rather than DBCS.
+    // Windows-1251 bytes for Cyrillic are 0xC0-0xFF (uppercase) and 0xE0-0xFF (lowercase).
+    // GBK lead bytes are 0x81-0xFE, but Cyrillic text has a characteristic distribution.
+    // If >60% of high bytes are in 0xC0-0xFF range AND the text is short, prefer single-byte.
+    if (rawBuf.length < 14) {
+      let highBytes = 0, cyrRange = 0;
+      for (let i = 0; i < rawBuf.length; i++) {
+        const b = rawBuf[i];
+        if (b >= 0x80) {
+          highBytes++;
+          if (b >= 0xC0 && b <= 0xFF) cyrRange++;
+        }
+      }
+      // If most high bytes are in Cyrillic/Western range, skip DBCS detection for short text
+      if (highBytes >= 2 && cyrRange / highBytes > 0.7) {
+        return null;
+      }
     }
 
     const dbcsEncodings = [

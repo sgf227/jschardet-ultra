@@ -33,6 +33,8 @@ const TEST_TEXTS = {
   western: 'Le café est une boisson préparée à partir des graines torréfiées de diverses variétés de caféier. La résistance des matériaux étudie le comportement des solides.',
   german: 'Wikipedia ist ein Projekt zum Aufbau einer Enzyklopädie aus freien Inhalten. Deutschland ist ein Bundesstaat in Mitteleuropa.',
   baltic: 'Vikipēdija ir brīvā enciklopēdija, ko var rediģēt ikviens. Latvijā ir daudz skaistu mežu un ezeru. Šī valsts atrodas Ziemeļeiropā un tās galvaspilsēta ir Rīga. Ārkārtīgi skaista pilsēta ar bagātu kultūras mantojumu.',
+  romanian: 'România este o țară situată în Europa de Sud-Est. București este capitala României. Istoria României este lungă și bogată. Ăă Șș Țț Îî Ââ',
+  maltese: 'Il-Wikipedija hija enċiklopedija ħielsa li tista\' teditja. Ġgħ Ħħ Żż Ċċ',
   ascii: 'The quick brown fox jumps over the lazy dog. 0123456789 !@#$%^&*()_+-=[]{}|;:,.<>?',
 };
 
@@ -78,7 +80,7 @@ const ENCODING_GROUPS = {
     'iso-8859-13': { text: 'baltic' },
     'iso-8859-14': { text: 'western' },
     'iso-8859-15': { text: 'western' },
-    'iso-8859-16': { text: 'polish' },
+    'iso-8859-16': { text: 'romanian' },
   },
 
   'IBM/DOS 代码页': {
@@ -178,10 +180,10 @@ const ENCODING_EQUIVALENCES = {
   // Unicode
   'utf-8': ['utf-8'],
   'ascii': ['ascii', 'us-ascii'],
-  'utf-16le': ['utf-16le', 'ucs-2', 'ucs2'],
-  'utf-16be': ['utf-16be'],
-  'utf-32le': ['utf-32le'],
-  'utf-32be': ['utf-32be'],
+  'utf-16le': ['utf-16le', 'ucs-2', 'ucs2', 'utf-16'],
+  'utf-16be': ['utf-16be', 'utf-16'],
+  'utf-32le': ['utf-32le', 'utf-32'],
+  'utf-32be': ['utf-32be', 'utf-32'],
 
   // Cyrillic family - all encode the same Cyrillic text, hard to distinguish
   'windows-1251': ['windows-1251', 'iso-8859-5', 'koi8-r', 'koi8-u', 'cp866', 'cp855', 'maccyrillic', 'macukraine'],
@@ -209,7 +211,7 @@ const ENCODING_EQUIVALENCES = {
   'macintosh': ['macintosh', 'macroman', 'windows-1252', 'iso-8859-1', 'cp850', 'cp437', 'cp866'],
   'macroman': ['macroman', 'macintosh', 'windows-1252', 'iso-8859-1'],
   'maciceland': ['maciceland', 'macintosh', 'windows-1252', 'cp850', 'cp437', 'cp866'],
-  'maccroatian': ['maccroatian', 'macintosh', 'windows-1252', 'cp850', 'cp437', 'cp866'],
+  'maccroatian': ['maccroatian', 'maccenteuro', 'macintosh', 'windows-1252', 'cp850', 'cp437', 'cp866'],
   'macromania': ['macromania', 'macintosh', 'windows-1252', 'cp850', 'cp437', 'cp866'],
 
   // Central European
