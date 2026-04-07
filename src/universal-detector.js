@@ -289,12 +289,41 @@ const SB_PROFILES = [
 
   // === DOS Code Pages ===
   {
+    encoding: 'cp437',
+    lang: 'box_drawing',
+    validRange: [0x80, 0xFF],
+    // CP437 DOS US: Uses 0x80-0xAF for accented Western/Greek chars, 0xB0-0xDF for box drawing
+    // Distinctive: 0xB5=╡, 0xB6=╢, 0xB7=╖, 0xB8=╕, 0xBD=╜, 0xBE=╛ (box drawing, NOT in cp850)
+    // Also: 0xC6=╞, 0xC7=╟, 0xCF=╧, 0xD0=╨, 0xD1=╤, 0xD2=╥, 0xD3=╙, 0xD4=╘, 0xD5=╒, 0xD6=╓, 0xD7=╫, 0xD8=╪
+    signature: [0xB5, 0xB6, 0xB7, 0xB8, 0xBD, 0xBE, 0xC6, 0xC7, 0xCF, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8],
+    invalidBytes: [],  // CP437 has no undefined bytes
+  },
+  {
     encoding: 'cp850',
     lang: 'western',
     validRange: [0x80, 0xFF],
     // CP850 Western European DOS: heavily uses 0x80-0x8F range for accented chars
     signature: [0x82, 0x83, 0x87, 0x88, 0x8B, 0x80, 0x81, 0x84, 0x85, 0x89, 0x8A, 0x8C],
     invalidBytes: [],  // CP850 has no undefined bytes
+  },
+  {
+    encoding: 'cp737',
+    lang: 'greek',
+    validRange: [0x80, 0xFF],
+    // CP737 DOS Greek: Greek uppercase at 0x80-0x97, lowercase at 0x98-0xAF, 0xE0-0xF0
+    // 0x80-0x97 are UNIQUE to cp737 (cp869 does NOT use this range for Greek)
+    // Most common Greek lowercase: ε=0x9C, ι=0xA0, α=0x98, ο=0xA6, ν=0x9B (high freq)
+    signature: [0x98, 0x9B, 0x9C, 0x9E, 0x9F, 0xA0, 0xA1, 0xA2, 0xA4, 0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD],
+    invalidBytes: [],  // CP737 has no undefined bytes
+  },
+  {
+    encoding: 'cp775',
+    lang: 'baltic',
+    validRange: [0x80, 0xFF],
+    // CP775 DOS Baltic: Baltic-specific chars at 0x80-0x9F range (ā=0x83, ē=0x89, ī=0x8C, ģ=0x85, Ģ=0x95)
+    // These 0x80-0x9F bytes are UNIQUE to cp775 (not in cp850/cp852 which use letters there)
+    signature: [0x83, 0x85, 0x89, 0x8C, 0x95, 0xA0, 0xA1, 0xBE, 0xC7, 0xCF, 0xD5, 0xD7, 0xD8, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE],
+    invalidBytes: [],  // CP775 has no undefined bytes
   },
   {
     encoding: 'cp852',
@@ -383,16 +412,6 @@ const SB_PROFILES = [
     // ó=0x97, ć=0xE6 are most common; very few high bytes in typical Croatian text
     signature: [0x97, 0xE6, 0x8D, 0x80, 0x81, 0x82, 0x83],
     invalidBytes: [],
-  },
-  {
-    encoding: 'armscii-8',
-    lang: 'armenian',
-    validRange: [0xA0, 0xFF],
-    // ARMSCII-8 Armenian: 0xA1 and 0xFF are the only invalid bytes
-    // Use signature bytes that are NOT in CE/Western encoding signatures
-    // These bytes decode to Armenian letters (0x0530-0x058F Unicode range)
-    signature: [0xBB, 0xBD, 0xC1, 0xC7, 0xC9, 0xCB, 0xCD, 0xCF, 0xD1, 0xD5, 0xD9, 0xDB, 0xDD, 0xEB, 0xEF],
-    invalidBytes: [0xA1, 0xFF],
   },
 ];
 
@@ -1281,6 +1300,15 @@ class UniversalDetector {
                                0x00DF, 0x00C9, 0x00C8, 0x00CA, 0x00CB, 0x00E7, 0x00F1, 0x00C0,
                                0x00E4, 0x00C4, 0x00F6, 0x00D6, 0x00FC, 0x00DC]),
       },
+      box_drawing: {
+        // Box drawing / block elements: CP437 DOS box drawing chars (0x2500-0x259F)
+        // Also includes common DOS symbols (0x2591-0x2593 = ░▒▓, 0x2588 = █)
+        ranges: [[0x2500, 0x259F]],
+        distinctive: new Set([0x2591, 0x2592, 0x2593, 0x2588, 0x2584, 0x2580, 0x2502, 0x2500,
+                               0x250C, 0x2510, 0x2514, 0x2518, 0x251C, 0x2524, 0x252C, 0x2534,
+                               0x253C, 0x2550, 0x2551, 0x2554, 0x2557, 0x255A, 0x255D, 0x2560,
+                               0x2563, 0x2566, 0x2569, 0x256C]),
+      },
       central_european: {
         // CE: mix of 0x00C0-0x00FF AND significant 0x0100-0x017F
         ranges: [[0x00C0, 0x00FF], [0x0100, 0x017F]],
@@ -1719,6 +1747,26 @@ class UniversalDetector {
         const replacementPenalty = rawBuf.length > 0 ? 1 - (replacements / rawBuf.length) : 1;
         const langScore = highChars > 0 ? langMatch / highChars : 0.5;
         const score = roundtripRatio * 0.4 + replacementPenalty * 0.3 + langScore * 0.3;
+
+        // Special guard for armscii-8: require very high Armenian char ratio (> 0.75)
+        // AND require that the bytes include chars outside the common Western range.
+        // Without this, Western text (0xE0-0xFF bytes) would be misidentified as Armenian.
+        if (enc === 'armscii-8') {
+          // Check if there are bytes in the 0xB0-0xFE range (Armenian-specific)
+          // that are NOT in the 0xE0-0xFF range (which overlaps with Western encodings)
+          let armenianSpecificBytes = 0;
+          for (let i = 0; i < rawBuf.length; i++) {
+            const b = rawBuf[i];
+            // 0xA2-0xAF range: Armenian punctuation/special chars (not in Western)
+            // 0xB0-0xCF range: Armenian letters (not in Western 0xC0-0xFF Western letters)
+            if ((b >= 0xA2 && b <= 0xAF) || (b >= 0xB0 && b <= 0xCF)) armenianSpecificBytes++;
+          }
+          const armenianSpecificRatio = armenianSpecificBytes / rawBuf.length;
+          // Require: >15% Armenian-specific bytes AND >75% Armenian lang score
+          if (armenianSpecificRatio < 0.15 || langScore < 0.75) {
+            continue;
+          }
+        }
 
         if (score > bestScore) { bestScore = score; bestEnc = enc; }
       } catch (e) { continue; }

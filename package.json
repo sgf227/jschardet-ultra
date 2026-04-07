@@ -9,7 +9,12 @@
     "test:round": "node test/run-round-test.js"
   },
   "keywords": ["encoding", "charset", "detection", "unicode", "cjk", "gbk", "big5", "shift_jis", "euc-jp", "euc-kr", "iso-8859", "windows-1252"],
-  "author": "",
+  "author": "sgf227 <1265968629@qq.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sgf227/jschardet-ultra.git"
+  },
+  "homepage": "https://github.com/sgf227/jschardet-ultra",
   "license": "MIT",
   "dependencies": {
     "iconv-lite": "^0.6.3"
